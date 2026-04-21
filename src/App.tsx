@@ -64,6 +64,87 @@ const STICKERS = ["SYSTEMS", "CLARITY", "CONSISTENCY", "PROTECTION"];
 
 // --- Components ---
 
+const TacticalLoader: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState("Initializing Encryption");
+
+  useEffect(() => {
+    const statuses = [
+      "Initializing Encryption",
+      "Scanning Personnel Database",
+      "Syncing Career Shields",
+      "Locking Subject Intelligence",
+      "Finalizing Extraction Protocol"
+    ];
+
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      const increment = Math.floor(Math.random() * 5) + 2;
+      currentProgress = Math.min(currentProgress + increment, 100);
+      setProgress(currentProgress);
+      
+      const statusIndex = Math.min(Math.floor((currentProgress / 100) * statuses.length), statuses.length - 1);
+      setStatus(statuses[statusIndex]);
+
+      if (currentProgress >= 100) {
+        clearInterval(interval);
+        setTimeout(onComplete, 500);
+      }
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [onComplete]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.8, ease: "circOut" }}
+      className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center p-6"
+    >
+      <div className="w-full max-w-md space-y-12">
+        <div className="space-y-4 text-center">
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto"
+          />
+          <h2 className="text-4xl font-black italic text-white underline decoration-yellow-400/50 uppercase tracking-tighter">DegreeGate</h2>
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex justify-between items-end">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black text-yellow-400 uppercase tracking-[0.3em]">{status}...</p>
+              <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Sector: Global Intelligence</p>
+            </div>
+            <div className="text-5xl font-black italic text-white">{progress}%</div>
+          </div>
+          
+          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/10">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              className="h-full bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)]"
+            />
+          </div>
+        </div>
+
+        <div className="pt-12 flex justify-center gap-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className={`w-2 h-2 rounded-full ${i <= (progress / 33) ? 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]' : 'bg-white/10'}`} />
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute bottom-12 left-12 space-y-1 hidden md:block">
+        <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">Signal Status: Encrypted</p>
+        <p className="text-[8px] font-black text-white/10 uppercase tracking-[0.4em]">Auth Level: Extraction Lead</p>
+      </div>
+    </motion.div>
+  );
+};
+
 const ProblemSection = () => (
   <section className="py-20 px-6 lg:px-20 relative overflow-hidden bg-yellow-400 border-y border-black/5">
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
@@ -1282,6 +1363,7 @@ const ContactView = () => (
 // --- Main App ---
 
 export default function App() {
+  const [isBooting, setIsBooting] = useState(true);
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
 
@@ -1306,7 +1388,14 @@ export default function App() {
   };
 
   return (
-    <div className="geometric-container">
+    <>
+      <AnimatePresence mode="wait">
+        {isBooting && (
+          <TacticalLoader key="boot-loader" onComplete={() => setIsBooting(false)} />
+        )}
+      </AnimatePresence>
+
+      <div className="geometric-container">
       <Navbar activePage={currentPage} setPage={setView} />
       
       <main className="flex-1">
@@ -1399,6 +1488,7 @@ export default function App() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
