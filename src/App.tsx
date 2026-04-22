@@ -42,7 +42,10 @@ type PageId =
   | 'expert-advice' 
   | 'degree-gateway' 
   | 'about' 
-  | 'contact';
+  | 'contact'
+  | 'blog'
+  | 'privacy'
+  | 'terms';
 
 interface Subject {
   id: string;
@@ -305,7 +308,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
     <header 
       className={`h-[100px] fixed top-0 left-0 right-0 transition-all duration-500 flex items-center ${
         isOpen 
-          ? 'z-[99999] bg-[#0a0a0a] shadow-2xl' 
+          ? 'z-[99999] bg-white shadow-2xl' 
           : scrolled 
             ? 'z-[100] backdrop-blur-xl bg-black/40 h-[80px] shadow-2xl border-b border-white/5' 
             : 'z-[100] backdrop-blur-sm bg-black/20'
@@ -323,10 +326,10 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
             </div>
           </div>
           <div className="flex flex-col">
-            <div className={`font-display text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${navTextColor}`}>
+            <div className={`font-display text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${isOpen ? 'text-slate-900' : navTextColor}`}>
               DegreeGate<span className="text-yellow-400">.</span>
             </div>
-            <div className="text-[10px] font-black text-white/50 uppercase tracking-[0.5em] leading-none mt-1">Intelligence Gate</div>
+            <div className={`text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-1 ${isOpen ? 'text-slate-400' : 'text-white/50'}`}>Intelligence Gate</div>
           </div>
         </div>
 
@@ -387,6 +390,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
           <button onClick={() => setPage('subject-catalog')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'subject-catalog' ? 'after:w-full' : ''}`}>Subject Hub</button>
           <button onClick={() => setPage('expert-advice')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'expert-advice' ? 'after:w-full' : ''}`}>Expert Advice</button>
           <button onClick={() => setPage('degree-gateway')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'degree-gateway' ? 'after:w-full' : ''}`}>Gateway</button>
+          <button onClick={() => setPage('blog')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'blog' ? 'after:w-full' : ''}`}>Blog</button>
           <button onClick={() => setPage('about')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'about' ? 'after:w-full' : ''}`}>About</button>
           
           <button 
@@ -400,7 +404,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
         {/* Mobile Toggle */}
         <button 
           className={`lg:hidden w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative z-[100002] ${
-            isOpen ? 'bg-yellow-400 text-black scale-110 shadow-yellow-400/30 rotate-90' : 'bg-black text-white border border-white/20'
+            isOpen ? 'bg-yellow-400 text-black scale-110 shadow-yellow-400/30' : 'bg-black text-white border border-white/20'
           }`} 
           onClick={() => setIsOpen(!isOpen)}
         >
@@ -415,16 +419,16 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed left-0 right-0 bottom-0 bg-[#0a0a0a] lg:hidden z-[99998] flex flex-col items-center justify-start overflow-y-auto pt-48 ${
+            className={`fixed left-0 right-0 bottom-0 bg-white lg:hidden z-[99998] flex flex-col items-center justify-start overflow-y-auto pt-48 ${
               scrolled ? 'top-[80px]' : 'top-[100px]'
             }`}
           >
-            <div className="flex flex-col p-10 gap-6 font-black text-white text-2xl tracking-tighter w-full max-w-sm text-center">
+            <div className="flex flex-col p-10 gap-6 font-black text-slate-900 text-2xl tracking-tighter w-full max-w-sm text-center">
               <div className="mb-8 flex flex-col items-center gap-4">
                 <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center rotate-12 shadow-2xl shadow-yellow-400/20">
                    <GraduationCap size={36} className="text-black" />
                 </div>
-                <div className="text-[10px] font-black text-yellow-400 uppercase tracking-[0.8em]">Tactical Interface</div>
+                <div className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.8em]">Tactical Interface</div>
               </div>
 
               <motion.button 
@@ -432,7 +436,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 onClick={() => { setPage('home'); setIsOpen(false); }} 
-                className="text-center py-5 border-y border-white/10 italic hover:text-yellow-400 transition-all uppercase tracking-tight group"
+                className="text-center py-5 border-y border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight group"
               >
                 <span className="group-hover:translate-x-2 transition-transform inline-block">Base Hub</span>
               </motion.button>
@@ -443,14 +447,14 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
                 transition={{ delay: 0.2 }}
                 className="space-y-4 py-4"
               >
-                <span className="text-[10px] text-yellow-400 uppercase tracking-widest block font-black mb-6 opacity-60">Strategic Shields</span>
+                <span className="text-[10px] text-slate-400 uppercase tracking-widest block font-black mb-6 opacity-60">Strategic Shields</span>
                 <div className="grid grid-cols-1 gap-4 px-4">
-                  <button onClick={() => { setPage('thesis-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-lg">
-                    <GraduationCap size={20} className="text-yellow-400 group-hover:text-black" /> 
+                  <button onClick={() => { setPage('thesis-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
+                    <GraduationCap size={20} className="text-yellow-600 group-hover:text-black" /> 
                     Thesis Shield
                   </button>
-                  <button onClick={() => { setPage('internship-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-lg">
-                    <Briefcase size={20} className="text-yellow-400 group-hover:text-black" /> 
+                  <button onClick={() => { setPage('internship-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
+                    <Briefcase size={20} className="text-yellow-600 group-hover:text-black" /> 
                     Internship Shield
                   </button>
                 </div>
@@ -461,7 +465,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 onClick={() => { setPage('subject-catalog'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-white/10 italic hover:text-yellow-400 transition-all uppercase tracking-tight"
+                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
               >
                 Subject Inventory
               </motion.button>
@@ -471,7 +475,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 onClick={() => { setPage('expert-advice'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-white/10 italic hover:text-yellow-400 transition-all uppercase tracking-tight"
+                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
               >
                 Expert Intel
               </motion.button>
@@ -481,7 +485,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
                 onClick={() => { setPage('degree-gateway'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-white/10 italic hover:text-yellow-400 transition-all uppercase tracking-tight"
+                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
               >
                 The Gateway
               </motion.button>
@@ -489,9 +493,19 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
               <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55 }}
+                onClick={() => { setPage('blog'); setIsOpen(false); }} 
+                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
+              >
+                Intelligence Blog
+              </motion.button>
+
+              <motion.button 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
                 onClick={() => { setPage('contact'); setIsOpen(false); }} 
-                className="geometric-button-primary w-full mt-10 !py-8 text-center !rounded-full bg-yellow-400 !text-black border-none shadow-[0_20px_50px_rgba(255,190,0,0.4)] italic uppercase text-xl font-black hover:scale-105 active:scale-95 transition-all"
+                className="geometric-button-primary w-full mt-10 !py-8 text-center !rounded-full bg-slate-900 !text-white border-none shadow-2xl italic uppercase text-xl font-black hover:bg-yellow-400 hover:!text-black transition-all"
               >
                 Open Channel
               </motion.button>
@@ -509,7 +523,7 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
   return (
     <div className="flex flex-col bg-transparent w-full overflow-x-hidden pt-0">
       {/* Section 0: Hero Section - The "Creators" Layout */}
-      <section className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-6 lg:px-20 overflow-hidden py-32">
+      <section className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-6 lg:px-20 overflow-hidden pt-[140px] pb-32">
         {/* Video Background */}
         <div className="absolute inset-0 z-0">
           <video
@@ -655,13 +669,11 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
           <div className="relative group">
              <div className="absolute -inset-4 bg-black/10 rounded-[4rem] rotate-3 blur-2xl group-hover:rotate-6 transition-transform" />
-             <video 
-               src="https://degreegate.com/wp-content/uploads/2026/04/kkk.mp4" 
-               autoPlay 
-               muted 
-               loop 
-               playsInline
-               className="relative rounded-[3rem] w-full aspect-[4/5] object-contain bg-black shadow-2xl border-[10px] border-black"
+             <img 
+               src="https://degreegate.com/wp-content/uploads/2026/04/img_4502.jpg" 
+               className="relative rounded-[3rem] w-full aspect-[4/5] object-cover bg-black shadow-2xl border-[10px] border-black"
+               referrerPolicy="no-referrer"
+               alt="Expert Advice"
              />
              <div className="absolute top-10 right-10 w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-black text-black animate-bounce shadow-2xl z-20">
                <Zap size={40} className="fill-black" />
@@ -761,7 +773,7 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
 
 const ThesisShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
   <div className="bg-purple-300">
-    <section className="min-h-[65vh] flex items-center justify-center px-6 lg:px-20 py-24 relative overflow-hidden">
+    <section className="min-h-[65vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-black/5 z-0 h-[65vh] lg:h-[60vh] rounded-b-[4rem] lg:rounded-b-[10rem] shadow-sm backdrop-blur-sm" />
       <div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-2 gap-20 items-center">
         <div className="space-y-10">
@@ -827,7 +839,7 @@ const ThesisShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
 
 const InternshipShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
   <div className="bg-yellow-400">
-    <section className="min-h-[70vh] flex items-center justify-center px-6 lg:px-20 py-24 relative overflow-hidden">
+    <section className="min-h-[70vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[80vw] lg:w-[50vw] h-full bg-black/5 -skew-x-12 z-0 backdrop-blur-sm shadow-2xl" />
       <div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-2 gap-20 items-center">
         <motion.div 
@@ -902,7 +914,7 @@ const InternshipShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => 
 );
 
 const CatalogView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) => (
-  <div className="bg-purple-300 py-20 px-6 lg:px-20 min-h-screen">
+  <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen">
     <div className="max-w-7xl mx-auto space-y-24">
       <div className="space-y-8 max-w-4xl">
         <div className="geometric-badge bg-black text-white">Deployment Ready</div>
@@ -942,7 +954,7 @@ const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage:
   const subject = SUBJECTS.find(s => s.id === subjectId) || SUBJECTS[0];
   
   return (
-    <div className="bg-transparent py-20 px-6 lg:px-20 overflow-hidden relative">
+    <div className="bg-transparent pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative">
       <div className="max-w-7xl mx-auto space-y-24 relative z-10">
         <div className="space-y-12 max-w-5xl">
           <button 
@@ -1067,7 +1079,7 @@ const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage:
 };
 
 const ExpertAdviceView = () => (
-  <div className="bg-yellow-400 py-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
+  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black/[0.03] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none">
       Elite
     </div>
@@ -1141,7 +1153,7 @@ const ExpertAdviceView = () => (
 );
 
 const DegreeGatewayView = () => (
-  <div className="bg-purple-300 py-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
+  <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
     <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 lg:gap-32 items-center relative z-10">
       <div className="space-y-12">
         <div className="space-y-8">
@@ -1196,17 +1208,17 @@ const DegreeGatewayView = () => (
 );
 
 const AboutView = () => (
-  <div className="bg-yellow-400 py-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
+  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
     <div className="absolute top-0 right-0 w-[80vw] lg:w-[40vw] h-full bg-black/5 border-l border-black/5 z-0 backdrop-blur-sm" />
     <div className="max-w-7xl mx-auto space-y-32 relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-center">
         <div className="space-y-12">
           <div className="space-y-8">
             <div className="geometric-badge bg-black text-white">Operational History</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[8rem] lg:text-[10rem] leading-[0.7] italic uppercase tracking-tighter text-black drop-shadow-none">The <br /><span className="text-white underline decoration-8">DegreeGate</span><br /> Narrative.</h1>
+            <h1 className="text-6xl sm:text-7xl md:text-[108px] leading-[0.7] italic uppercase tracking-tighter text-black drop-shadow-none">The <br /><span className="text-white underline decoration-8 text-[99px]">DegreeGate</span><br /> Narrative.</h1>
             <p className="text-xl md:text-2xl italic font-black max-w-lg border-l-[12px] border-black pl-10 text-black drop-shadow-none">We didn't start as a business. We started as students who realized the system was built to be broken, and then we mastered the cracks.</p>
           </div>
-          <div className="space-y-8 text-black/80 text-lg leading-relaxed font-black max-w-xl italic">
+          <div className="space-y-8 text-black/80 text-sm leading-relaxed font-black max-w-xl italic">
              <p>Founded by graduates who navigated the complex academic landscape of Europe, DegreeGate was born out of one simple truth: <strong className="text-black italic drop-shadow-none">Traditional support is slow, expensive, and fundamentally out of touch with high-impact reality.</strong></p>
              <p>Our mentors aren't just academics. They are mercenaries of the corporate world who have scaled their own careers into global powerhouses like Amazon, Google, and beyond. We don't just teach modules; we deployment career assets.</p>
           </div>
@@ -1243,8 +1255,8 @@ const AboutView = () => (
   </div>
 );
 
-const ContactView = () => (
-  <div className="bg-purple-300 py-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
+const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => (
+  <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.05),transparent)]" />
     <div className="max-w-7xl mx-auto relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32">
@@ -1273,11 +1285,26 @@ const ContactView = () => (
           </div>
 
           <div className="pt-16 border-t border-accent/10">
-             <div className="flex flex-wrap gap-8">
-                {['Facebook', 'Instagram', 'TikTok', 'LinkedIn', 'YouTube'].map(s => (
-                  <button key={s} className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all">[{s}]</button>
-                ))}
-             </div>
+            <div className="flex gap-8">
+              <button 
+                onClick={() => setPage('privacy')}
+                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all"
+              >
+                [Privacy Policy]
+              </button>
+              <button 
+                onClick={() => setPage('terms')}
+                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all"
+              >
+                [Terms of Service]
+              </button>
+              <button 
+                onClick={() => setPage('blog')}
+                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all"
+              >
+                [Intelligence Blog]
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1360,12 +1387,94 @@ const ContactView = () => (
   </div>
 );
 
+const BlogView = () => (
+  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden">
+    <div className="max-w-7xl mx-auto space-y-20 relative z-10">
+      <div className="text-center space-y-8 max-w-4xl mx-auto">
+        <div className="geometric-badge mx-auto bg-black text-white">Intelligence Pipeline</div>
+        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-900 tracking-tighter">Strategic <br /><span className="text-yellow-500 underline">Intel.</span></h1>
+        <p className="text-xl text-slate-500 font-bold italic border-x border-slate-200 px-10">Operational briefings, system updates, and academic extraction tactics.</p>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="geometric-card bg-white border-slate-200 p-10 space-y-8 group hover:border-yellow-400 transition-all shadow-sm">
+            <div className="aspect-video bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-100">
+               <div className="absolute inset-0 flex items-center justify-center text-slate-300 italic font-black text-xs uppercase tracking-widest">Signal Awaiting Data...</div>
+            </div>
+            <div className="space-y-4">
+              <div className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Protocol: AL-00{i}</div>
+              <h3 className="text-2xl font-black text-slate-900 italic uppercase leading-tight group-hover:text-yellow-600 transition-colors">Pending Tactical Extraction</h3>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed italic">Intelligence payload is currently being encrypted. Full briefing accessible soon.</p>
+            </div>
+            <button className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors flex items-center gap-3">
+              Decrypt Full Story <ArrowRight size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const PrivacyView = () => (
+  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+    <div className="max-w-4xl mx-auto space-y-16">
+      <div className="space-y-6">
+        <div className="geometric-badge bg-black text-white">Security Protocol</div>
+        <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter">Privacy <span className="text-yellow-500">Shield.</span></h1>
+      </div>
+      <div className="prose prose-slate max-w-none space-y-8 text-slate-600 font-medium italic">
+        <section className="space-y-4">
+          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">01. Signal Encryption</h2>
+          <p>We respect your tactical data. All intelligence signals sent via DegreeGate are encrypted using enterprise-grade protocols. Your personal academic footprint is treated with the highest level of security.</p>
+        </section>
+        <section className="space-y-4">
+          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">02. Data Extraction</h2>
+          <p>We only collect the minimum intelligence necessary to facilitate your academic protection. This includes your contact vectors and university sector details.</p>
+        </section>
+        <div className="p-8 bg-slate-100 rounded-3xl border border-slate-200">
+          <p className="text-xs uppercase tracking-widest font-black text-slate-400 mb-2">Update status</p>
+          <p className="text-lg font-black text-slate-900 italic uppercase tracking-tighter">Current Revision: April 2026</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const TermsView = () => (
+  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+    <div className="max-w-4xl mx-auto space-y-16">
+      <div className="space-y-6">
+        <div className="geometric-badge bg-black text-white">Engagement Protocol</div>
+        <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter">Terms of <span className="text-yellow-500">Service.</span></h1>
+      </div>
+      <div className="prose prose-slate max-w-none space-y-8 text-slate-600 font-medium italic">
+        <section className="space-y-4">
+          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">01. Service Deployment</h2>
+          <p>By initializing a signal with DegreeGate, you agree to our engagement protocols. Our shields are architectural in nature; we provide tactical guidance, not academic dishonesty.</p>
+        </section>
+        <section className="space-y-4">
+          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">02. Operational Limits</h2>
+          <p>DegreeGate is an intelligence network. We do not guarantee specific outcomes but provide the highest level of strategic preparation possible under current global university regulations.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+);
+
 // --- Main App ---
 
 export default function App() {
   const [isBooting, setIsBooting] = useState(true);
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isBooting) {
+      window.scrollTo(0, 0);
+    }
+  }, [currentPage, activeSubjectId, isBooting]);
 
   const setView = (page: PageId, id?: string) => {
     setCurrentPage(page);
@@ -1382,7 +1491,10 @@ export default function App() {
       case 'expert-advice': return <ExpertAdviceView />;
       case 'degree-gateway': return <DegreeGatewayView />;
       case 'about': return <AboutView />;
-      case 'contact': return <ContactView />;
+      case 'contact': return <ContactView setPage={setView} />;
+      case 'blog': return <BlogView />;
+      case 'privacy': return <PrivacyView />;
+      case 'terms': return <TermsView />;
       default: return <HomeView setPage={setView} />;
     }
   };
@@ -1412,8 +1524,9 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="bg-black text-white py-20 px-6 md:px-10 mt-32 border-t-[10px] border-yellow-400 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400/5 rounded-full blur-[120px] -mr-48 -mt-48" />
+      <footer className="bg-slate-50 text-slate-900 py-24 px-6 md:px-10 mt-32 border-t-[10px] border-yellow-400 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/5 rounded-full blur-[120px] -mr-64 -mt-64" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-slate-200 rounded-full blur-[100px] -ml-48 -mb-48 opacity-30" />
         <div className="max-w-7xl mx-auto space-y-20 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div className="space-y-6">
@@ -1428,62 +1541,74 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex flex-col justify-center">
-                  <div className="font-display text-xl lg:text-2xl font-black text-white tracking-tighter uppercase italic leading-none">
-                    DegreeGate<span className="text-yellow-400 font-black">°</span>
+                  <div className="font-display text-xl lg:text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+                    DegreeGate<span className="text-yellow-500 font-black">°</span>
                   </div>
-                  <div className="text-[7px] font-black text-yellow-400 uppercase tracking-[0.2em] mt-0.5 opacity-60">Tactical Strategy Hub</div>
+                  <div className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">Tactical Strategy Hub</div>
                 </div>
               </div>
-              <p className="text-white/40 text-[11px] font-medium leading-relaxed max-w-xs italic uppercase tracking-tighter">
+              <p className="text-slate-500 text-[11px] font-medium leading-relaxed max-w-xs italic uppercase tracking-tighter">
                 Tactical academic and career protection for high-impact students. We audit the system so you don't have to.
               </p>
             </div>
             
             <div className="space-y-5">
-              <h4 className="text-[9px] font-black uppercase text-yellow-400 tracking-[0.2em]">Operational Sectors</h4>
+              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Operational Sectors</h4>
               <ul className="space-y-3">
-                <li><button onClick={() => setView('thesis-shield')} className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Thesis Shield</button></li>
-                <li><button onClick={() => setView('internship-shield')} className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Internship Pipeline</button></li>
-                <li><button onClick={() => setView('subject-catalog')} className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Subject Catalog</button></li>
-                <li><button onClick={() => setView('degree-gateway')} className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Gateway Hub</button></li>
+                <li><button onClick={() => setView('thesis-shield')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Thesis Shield</button></li>
+                <li><button onClick={() => setView('internship-shield')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Internship Pipeline</button></li>
+                <li><button onClick={() => setView('subject-catalog')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Subject Catalog</button></li>
+                <li><button onClick={() => setView('degree-gateway')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Gateway Hub</button></li>
               </ul>
             </div>
-
+            
             <div className="space-y-5">
-              <h4 className="text-[9px] font-black uppercase text-yellow-400 tracking-[0.2em]">Direct Channels</h4>
+              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Direct Channels</h4>
               <ul className="space-y-3">
-                <li><a href="mailto:help@degreegate.com" className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">help@degreegate.com</a></li>
-                <li><button onClick={() => setView('about')} className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Operational History</button></li>
-                <li><button onClick={() => setView('contact')} className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Contact Intel</button></li>
-                <li><a href="#" className="text-[11px] font-bold text-white/70 hover:text-yellow-400 transition-colors uppercase italic tracking-tighter">Terms of Service</a></li>
+                <li><a href="mailto:help@degreegate.com" className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">help@degreegate.com</a></li>
+                <li><button onClick={() => setView('blog')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Intelligence Blog</button></li>
+                <li><button onClick={() => setView('about')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Operational History</button></li>
+                <li><button onClick={() => setView('contact')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Contact Intel</button></li>
               </ul>
             </div>
 
             <div className="space-y-6">
-              <h4 className="text-[9px] font-black uppercase text-yellow-400 tracking-[0.2em]">Newsletter Pipeline</h4>
-              <p className="text-white/50 text-[10px] font-bold uppercase tracking-tighter italic">Secure your position in the first wave of academic intelligence.</p>
-            <div className="flex gap-2">
-              <input name="newsletter_email" type="email" placeholder="ENCRYPTED EMAIL" className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-[10px] font-bold focus:border-yellow-400 outline-none flex-1 transition-all text-white italic focus:bg-white/10" />
-              <button 
-                onClick={() => alert('PIPELINE SECURED. You have been added to the intelligence flow.')}
-                className="bg-yellow-400 text-black p-2.5 rounded-lg hover:bg-white transition-all shadow-lg shadow-yellow-400/10"
-              >
-                <ArrowRight size={16} />
-              </button>
+              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
+              <ul className="space-y-3">
+                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
+                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
+              </ul>
             </div>
+
+            <div className="space-y-6">
+              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Newsletter Pipeline</h4>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter italic leading-relaxed">Secure your position in the first wave of academic intelligence.</p>
+              <div className="flex gap-2">
+                <input name="newsletter_email" type="email" placeholder="ENCRYPTED EMAIL" className="bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[10px] font-bold focus:border-yellow-500 outline-none flex-1 transition-all text-slate-900 italic focus:bg-slate-100" />
+                <button 
+                  onClick={() => alert('PIPELINE SECURED. You have been added to the intelligence flow.')}
+                  className="bg-slate-900 text-white p-2.5 rounded-lg hover:bg-yellow-400 hover:text-black transition-all shadow-lg"
+                >
+                  <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
           
-          <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-[10px] font-black text-white/30 uppercase tracking-widest italic">
+          <div className="pt-10 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               © 2026 DegreeGate Intelligence Network. All Rights Reserved.
             </div>
             <div className="flex gap-8">
-              <a href="#" className="text-white/40 hover:text-yellow-400 transition-all hover:scale-110" title="Facebook"><Facebook size={22} /></a>
-              <a href="#" className="text-white/40 hover:text-yellow-400 transition-all hover:scale-110" title="Instagram"><Instagram size={22} /></a>
-              <a href="#" className="text-white/40 hover:text-yellow-400 transition-all hover:scale-110" title="TikTok"><Music2 size={22} /></a>
-              <a href="#" className="text-white/40 hover:text-yellow-400 transition-all hover:scale-110" title="LinkedIn"><Linkedin size={22} /></a>
-              <a href="#" className="text-white/40 hover:text-yellow-400 transition-all hover:scale-110" title="YouTube"><Youtube size={22} /></a>
+              {[
+                { icon: <Facebook size={22} />, title: "Facebook" },
+                { icon: <Instagram size={22} />, title: "Instagram" },
+                { icon: <Music2 size={22} />, title: "TikTok" },
+                { icon: <Linkedin size={22} />, title: "LinkedIn" },
+                { icon: <Youtube size={22} />, title: "YouTube" }
+              ].map((social, i) => (
+                <a key={i} href="#" className="text-slate-300 hover:text-yellow-500 transition-all hover:scale-110" title={social.title}>{social.icon}</a>
+              ))}
             </div>
           </div>
         </div>
