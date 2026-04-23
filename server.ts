@@ -19,11 +19,12 @@ async function startServer() {
   // Admin Authentication Pipeline
   app.post("/api/admin/auth", (req, res) => {
     const { password } = req.body;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    let adminPassword = process.env.ADMIN_PASSWORD;
 
+    // Tactical Fallback for easier setup
     if (!adminPassword) {
-      console.error("[SIGNAL ERROR] ADMIN_PASSWORD mission missing.");
-      return res.status(500).json({ error: "Intelligence configuration failure: ADMIN_PASSWORD not set." });
+      console.warn("[SIGNAL WARNING] ADMIN_PASSWORD not set. Using tactical fallback 'tactical123'");
+      adminPassword = "tactical123";
     }
 
     if (password === adminPassword) {

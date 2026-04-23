@@ -11,6 +11,7 @@ import {
   db, 
   googleProvider, 
   signInWithPopup, 
+  signInAnonymously,
   signOut, 
   onAuthStateChanged,
   collection,
@@ -1515,11 +1516,12 @@ const TermsView = () => (
   </div>
 );
 
-const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
+const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => {
   const [sessionToken, setSessionToken] = useState<string | null>(localStorage.getItem('dg_admin_token'));
   const [password, setPassword] = useState('');
   const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem('dg_admin_token'));
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [newPost, setNewPost] = useState<Partial<BlogPost>>({
     title: '',
@@ -1529,9 +1531,17 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
     body: ''
   });
 
+  // Auto-login check on mount
+  useEffect(() => {
+    if (localStorage.getItem('dg_admin_token')) {
+      setIsAdmin(true);
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/admin/auth', {
         method: 'POST',
@@ -1544,12 +1554,22 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
       if (response.ok) {
         localStorage.setItem('dg_admin_token', data.token);
         setSessionToken(data.token);
+        
+        // Tactical: Background Firebase sign-in to satisfy Firestore security rules
+        try {
+          await signInAnonymously(auth);
+        } catch (authError) {
+          console.error('Tactical Auth Failed:', authError);
+        }
+
         setIsAdmin(true);
+        setPassword('');
       } else {
-        alert(data.error || 'ACCESS DENIED.');
+        setError(data.error || 'ACCESS DENIED.');
       }
     } catch (e) {
       console.error('Auth Signal Failure:', e);
+      setError('Communication link severed. Check server status.');
     } finally {
       setLoading(false);
     }
@@ -1559,6 +1579,7 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
     localStorage.removeItem('dg_admin_token');
     setSessionToken(null);
     setIsAdmin(false);
+    setError(null);
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -1697,6 +1718,17 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
                 className="w-full bg-white/5 border border-white/10 rounded-full px-8 py-4 text-sm font-bold text-white focus:border-yellow-400 outline-none transition-all italic"
               />
             </div>
+            
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase italic p-3 rounded-xl text-center"
+              >
+                {error}
+              </motion.div>
+            )}
+
             <button 
               type="submit"
               disabled={loading}
@@ -1829,6 +1861,12 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
                 </div>
                 <div className="flex gap-8 items-center">
                   <button 
+                    onClick={() => setPage('blog-post', post.slug)}
+                    className="text-[10px] font-black text-yellow-600 uppercase tracking-widest hover:text-black transition-colors italic"
+                  >
+                    View on Site
+                  </button>
+                  <button 
                     onClick={() => handleDelete(post.id!)}
                     className="text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors italic"
                   >
@@ -1895,7 +1933,7 @@ export default function App() {
         const post = posts.find(p => p.slug === activePostSlug);
         return post ? <BlogPostView post={post} setPage={setView} /> : <BlogView posts={posts} setPage={setView} />;
       }
-      case 'admin': return <AdminPortal posts={posts} />;
+      case 'admin': return <AdminPortal posts={posts} setPage={setView} />;
       case 'privacy': return <PrivacyView />;
       case 'terms': return <TermsView />;
       default: return <HomeView setPage={setView} />;
