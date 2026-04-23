@@ -12,40 +12,24 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Tactical Newsletter Subscription
-  app.post("/api/newsletter/subscribe", async (req, res) => {
-    const { email } = req.body;
-    const apiKey = process.env.BREVO_API_KEY;
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "OPERATIONAL", timestamp: new Date().toISOString() });
+  });
 
-    if (!apiKey) {
-      console.error("[SIGNAL ERROR] BREVO_API_KEY mission missing.");
-      return res.status(500).json({ error: "Intelligence configuration failure." });
+  // Admin Authentication Pipeline
+  app.post("/api/admin/auth", (req, res) => {
+    const { password } = req.body;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+      console.error("[SIGNAL ERROR] ADMIN_PASSWORD mission missing.");
+      return res.status(500).json({ error: "Intelligence configuration failure: ADMIN_PASSWORD not set." });
     }
 
-    try {
-      const response = await fetch("https://api.brevo.com/v3/contacts", {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "api-key": apiKey
-        },
-        body: JSON.stringify({
-          email: email,
-          updateEnabled: true
-        })
-      });
-
-      if (response.ok) {
-        return res.json({ success: true, message: "Signal accepted. Tactical updates pending." });
-      } else {
-        const errorData = await response.json();
-        console.error("[SIGNAL COLLISION] Brevo rejection:", errorData);
-        return res.status(response.status).json({ error: "Signal interference. Try again later." });
-      }
-    } catch (error) {
-      console.error("[SIGNAL LOSS] Operational failure:", error);
-      return res.status(500).json({ error: "Communication link severed." });
+    if (password === adminPassword) {
+      return res.json({ success: true, token: "tactical-session-" + Date.now() });
+    } else {
+      return res.status(401).json({ error: "REJECTED. Authentication signal mismatch." });
     }
   });
 

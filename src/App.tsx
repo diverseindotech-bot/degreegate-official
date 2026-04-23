@@ -49,7 +49,8 @@ import {
   MapPin,
    Loader2,
   Zap,
-  Download
+  Download,
+  Lock
 } from 'lucide-react';
 
 // --- Types ---
@@ -1515,9 +1516,10 @@ const TermsView = () => (
 );
 
 const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [sessionToken, setSessionToken] = useState<string | null>(localStorage.getItem('dg_admin_token'));
+  const [password, setPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem('dg_admin_token'));
+  const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newPost, setNewPost] = useState<Partial<BlogPost>>({
     title: '',
@@ -1527,42 +1529,47 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
     body: ''
   });
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        const adminDoc = await getDoc(doc(db, 'admins', u.uid));
-        setIsAdmin(adminDoc.exists() || u.email === 'raajveernildz@gmail.com');
-      } else {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
-    return unsubscribe;
-  }, []);
-
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const response = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        localStorage.setItem('dg_admin_token', data.token);
+        setSessionToken(data.token);
+        setIsAdmin(true);
+      } else {
+        alert(data.error || 'ACCESS DENIED.');
+      }
     } catch (e) {
-      console.error('Login Signal Failure:', e);
+      console.error('Auth Signal Failure:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
+  const handleLogout = () => {
+    localStorage.removeItem('dg_admin_token');
+    setSessionToken(null);
+    setIsAdmin(false);
   };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAdmin) return;
     setLoading(true);
     try {
       const slug = newPost.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'briefing-' + Date.now();
       await addDoc(collection(db, 'blog_posts'), {
         ...newPost,
         slug,
-        authorId: user?.uid,
+        authorId: 'admin',
         createdAt: Timestamp.now()
       });
       setIsCreating(false);
@@ -1662,7 +1669,7 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
     </div>
   );
 
-  if (!user || !isAdmin) {
+  if (!isAdmin) {
     return (
       <div className="bg-black pt-[200px] min-h-screen flex items-center justify-center px-6">
         <motion.div 
@@ -1674,26 +1681,31 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
             <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center mx-auto rotate-12 shadow-2xl">
               <ShieldCheck size={32} className="text-black" />
             </div>
-            <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">Command <span className="text-yellow-400">Auth.</span></h2>
-            <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Secure Administrative Access</p>
+            <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">Command <span className="text-yellow-400">Lock.</span></h2>
+            <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Encrypted Administrative Gateway</p>
           </div>
           
-          <div className="space-y-6">
-            {!user ? (
-              <button 
-                onClick={handleLogin}
-                className="geometric-button-primary w-full !py-6 !rounded-full italic bg-yellow-400 text-black hover:bg-white transition-all shadow-xl flex items-center justify-center gap-3"
-              >
-                <Globe size={18} /> Authenticate with Google
-              </button>
-            ) : (
-              <div className="text-center space-y-4">
-                <p className="text-red-500 font-black italic uppercase text-xs">UNAUTHORIZED SIGNAL. ID mismatch.</p>
-                <p className="text-white/40 text-[10px] mt-2">Your UID: {user.uid}</p>
-                <button onClick={handleLogout} className="text-white/40 uppercase text-[10px] font-black underline">Terminate Session</button>
-              </div>
-            )}
-          </div>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">Access Secret</label>
+              <input 
+                required
+                type="password"
+                placeholder="ENTER PASSPHRASE"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-full px-8 py-4 text-sm font-bold text-white focus:border-yellow-400 outline-none transition-all italic"
+              />
+            </div>
+            <button 
+              type="submit"
+              disabled={loading}
+              className="geometric-button-primary w-full !py-6 !rounded-full italic bg-yellow-400 text-black hover:bg-white transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <Lock size={18} />}
+              Authorize Session
+            </button>
+          </form>
         </motion.div>
       </div>
     );
@@ -1704,7 +1716,7 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
       <div className="max-w-7xl mx-auto space-y-16">
         <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b-4 border-black pb-12">
           <div>
-            <div className="geometric-badge bg-black text-white">System Admin: {user.email}</div>
+            <div className="geometric-badge bg-black text-white">Active Tactical Session</div>
             <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter mt-4">Intel. <span className="text-yellow-500">Dashboard.</span></h1>
           </div>
           <div className="flex gap-4">
@@ -1832,84 +1844,6 @@ const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
     </div>
   )
 }
-
-const NewsletterPipeline = () => {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    
-    setStatus('loading');
-    try {
-      const response = await fetch('/api/newsletter/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setStatus('success');
-        setMessage('PIPELINE SECURED. Welcome to the network.');
-        setEmail('');
-      } else {
-        setStatus('error');
-        setMessage(data.error || 'Signal interference.');
-      }
-    } catch (error) {
-      setStatus('error');
-      setMessage('Communication link severed.');
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Newsletter Pipeline</h4>
-      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter italic leading-relaxed">
-        {status === 'success' ? message : 'Secure your position in the first wave of academic intelligence.'}
-      </p>
-      
-      {status !== 'success' && (
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input 
-            required
-            type="email" 
-            placeholder="ENCRYPTED EMAIL" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={status === 'loading'}
-            className="bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[10px] font-bold focus:border-yellow-500 outline-none flex-1 transition-all text-slate-900 italic focus:bg-slate-100 disabled:opacity-50" 
-          />
-          <button 
-            type="submit"
-            disabled={status === 'loading'}
-            className="bg-slate-900 text-white p-2.5 rounded-lg hover:bg-yellow-400 hover:text-black transition-all shadow-lg flex items-center justify-center disabled:opacity-50 min-w-[42px]"
-          >
-            {status === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-          </button>
-        </form>
-      )}
-      
-      {status === 'error' && (
-        <p className="text-red-500 text-[9px] font-black uppercase italic">{message}</p>
-      )}
-      
-      {status === 'success' && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 text-green-600 text-[10px] font-black uppercase italic"
-        >
-          <ShieldCheck size={14} /> Mission Accomplished
-        </motion.div>
-      )}
-    </div>
-  );
-};
 
 // --- Main App ---
 
@@ -2041,16 +1975,13 @@ export default function App() {
               </ul>
             </div>
 
-            <div className="space-y-12">
-              <div className="space-y-6">
-                <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
-                <ul className="space-y-3">
-                  <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
-                  <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
-                  <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-slate-500/30 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
-                </ul>
-              </div>
-              <NewsletterPipeline />
+            <div className="space-y-6">
+              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
+              <ul className="space-y-3">
+                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
+                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
+                <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-slate-500/30 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
+              </ul>
             </div>
           </div>
           
