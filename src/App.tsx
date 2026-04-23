@@ -5,6 +5,8 @@
 
 import React, { useState, useEffect, useRef, useMemo, ReactNode } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
+import matter from 'gray-matter';
+import ReactMarkdown from 'react-markdown';
 import { 
   ChevronDown, 
   Menu, 
@@ -45,7 +47,17 @@ type PageId =
   | 'contact'
   | 'blog'
   | 'privacy'
-  | 'terms';
+  | 'terms'
+  | 'blog-post';
+
+interface BlogPost {
+  slug: string;
+  title: string;
+  date: string;
+  featured_image: string;
+  description: string;
+  body: string;
+}
 
 interface Subject {
   id: string;
@@ -1387,7 +1399,7 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => (
   </div>
 );
 
-const BlogView = () => (
+const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => (
   <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden">
     <div className="max-w-7xl mx-auto space-y-20 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
@@ -1397,21 +1409,57 @@ const BlogView = () => (
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="geometric-card bg-white border-slate-200 p-10 space-y-8 group hover:border-yellow-400 transition-all shadow-sm">
+        {posts.map(post => (
+          <div 
+            key={post.slug} 
+            onClick={() => setPage('blog-post', post.slug)}
+            className="geometric-card bg-white border-slate-200 p-10 space-y-8 group hover:border-yellow-400 transition-all shadow-sm cursor-pointer"
+          >
             <div className="aspect-video bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-100">
-               <div className="absolute inset-0 flex items-center justify-center text-slate-300 italic font-black text-xs uppercase tracking-widest">Signal Awaiting Data...</div>
+               <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
             </div>
             <div className="space-y-4">
-              <div className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Protocol: AL-00{i}</div>
-              <h3 className="text-2xl font-black text-slate-900 italic uppercase leading-tight group-hover:text-yellow-600 transition-colors">Pending Tactical Extraction</h3>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed italic">Intelligence payload is currently being encrypted. Full briefing accessible soon.</p>
+              <div className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">{new Date(post.date).toLocaleDateString()}</div>
+              <h3 className="text-2xl font-black text-slate-900 italic uppercase leading-tight group-hover:text-yellow-600 transition-colors">{post.title}</h3>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed italic">{post.description}</p>
             </div>
             <button className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors flex items-center gap-3">
               Decrypt Full Story <ArrowRight size={14} />
             </button>
           </div>
         ))}
+        {posts.length === 0 && (
+          <div className="col-span-full py-20 text-center">
+             <div className="text-slate-300 italic font-black text-xl uppercase tracking-widest">Signal Awaiting Data...</div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+const BlogPostView = ({ post, setPage }: { post: BlogPost, setPage: (p: PageId) => void }) => (
+  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+    <div className="max-w-4xl mx-auto space-y-16">
+      <button 
+        onClick={() => setPage('blog')}
+        className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-4"
+      >
+        <ArrowRight className="rotate-180" size={14} /> Back to Intel Pipeline
+      </button>
+
+      <div className="space-y-8 text-center md:text-left">
+        <div className="geometric-badge bg-black text-white">{new Date(post.date).toLocaleDateString()}</div>
+        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-900 tracking-tighter leading-none">{post.title}</h1>
+        <p className="text-xl text-slate-500 font-bold italic border-l-8 border-yellow-400 pl-8">{post.description}</p>
+      </div>
+
+      <div className="aspect-video rounded-[3rem] overflow-hidden border border-slate-200 shadow-2xl">
+        <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+      </div>
+
+      <div className="prose prose-slate max-w-none prose-headings:uppercase prose-headings:italic prose-headings:font-black prose-p:italic prose-p:font-medium prose-p:text-slate-700">
+        <ReactMarkdown>{post.body}</ReactMarkdown>
       </div>
     </div>
   </div>
@@ -1469,16 +1517,41 @@ export default function App() {
   const [isBooting, setIsBooting] = useState(true);
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
+  const [activePostSlug, setActivePostSlug] = useState<string | null>(null);
+
+  const posts = useMemo(() => {
+    const blogFiles = (import.meta as any).glob('/content/blog/*.md', { as: 'raw', eager: true });
+    return Object.entries(blogFiles).map(([path, content]) => {
+      // Basic frontmatter parser if matter (browser version) has issues with Buffer
+      // Adding a try-catch to ensure robustness
+      try {
+        const { data, content: body } = matter(content as string);
+        const slug = path.split('/').pop()?.replace('.md', '') || '';
+        return {
+          slug,
+          title: data.title || 'Untitled Report',
+          date: data.date || new Date().toISOString(),
+          featured_image: data.featured_image || 'https://picsum.photos/seed/degreegate/800/600',
+          description: data.description || 'Intelligence briefing description pending.',
+          body: body || ''
+        };
+      } catch (e) {
+        console.error('Extraction failed for:', path, e);
+        return null;
+      }
+    }).filter(Boolean).sort((a, b) => new Date(b!.date).getTime() - new Date(a!.date).getTime()) as BlogPost[];
+  }, []);
 
   useEffect(() => {
     if (!isBooting) {
       window.scrollTo(0, 0);
     }
-  }, [currentPage, activeSubjectId, isBooting]);
+  }, [currentPage, activeSubjectId, activePostSlug, isBooting]);
 
   const setView = (page: PageId, id?: string) => {
     setCurrentPage(page);
-    if (id) setActiveSubjectId(id);
+    if (page === 'subject-detail') setActiveSubjectId(id || null);
+    if (page === 'blog-post') setActivePostSlug(id || null);
   };
 
   const renderContent = () => {
@@ -1492,7 +1565,11 @@ export default function App() {
       case 'degree-gateway': return <DegreeGatewayView />;
       case 'about': return <AboutView />;
       case 'contact': return <ContactView setPage={setView} />;
-      case 'blog': return <BlogView />;
+      case 'blog': return <BlogView posts={posts} setPage={setView} />;
+      case 'blog-post': {
+        const post = posts.find(p => p.slug === activePostSlug);
+        return post ? <BlogPostView post={post} setPage={setView} /> : <BlogView posts={posts} setPage={setView} />;
+      }
       case 'privacy': return <PrivacyView />;
       case 'terms': return <TermsView />;
       default: return <HomeView setPage={setView} />;
