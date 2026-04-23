@@ -12,30 +12,41 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Tactical Intelligence Route
-  app.post("/api/contact", (req, res) => {
-    const { firstName, lastName, university, email, target, payload } = req.body;
-    
-    // Log extraction request to the secure server environment
-    console.log(`[EXTRACTION SIGNAL RECEIVED]`);
-    console.log(`- TARGET ACCOUNT  : help@degreegate.com`);
-    console.log(`- CODENAME        : ${firstName} ${lastName}`);
-    console.log(`- UNIVERSITY      : ${university}`);
-    console.log(`- INTEL PATH      : ${email}`);
-    console.log(`- DEPLOYMENT      : ${target}`);
-    console.log(`- PAYLOAD         : ${payload}`);
+  // Tactical Newsletter Subscription
+  app.post("/api/newsletter/subscribe", async (req, res) => {
+    const { email } = req.body;
+    const apiKey = process.env.BREVO_API_KEY;
 
-    /**
-     * MISSION NOTE:
-     * To enable real-time email notifications to help@degreegate.com, 
-     * integrate a service like SendGrid, Resend, or Mailgun here.
-     * Use process.env.EMAIL_SERVICE_API_KEY for authorization.
-     */
-    
-    res.json({ 
-      status: "SUCCESS", 
-      message: "Signal locked. Intelligence routed to central extraction unit." 
-    });
+    if (!apiKey) {
+      console.error("[SIGNAL ERROR] BREVO_API_KEY mission missing.");
+      return res.status(500).json({ error: "Intelligence configuration failure." });
+    }
+
+    try {
+      const response = await fetch("https://api.brevo.com/v3/contacts", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "api-key": apiKey
+        },
+        body: JSON.stringify({
+          email: email,
+          updateEnabled: true
+        })
+      });
+
+      if (response.ok) {
+        return res.json({ success: true, message: "Signal accepted. Tactical updates pending." });
+      } else {
+        const errorData = await response.json();
+        console.error("[SIGNAL COLLISION] Brevo rejection:", errorData);
+        return res.status(response.status).json({ error: "Signal interference. Try again later." });
+      }
+    } catch (error) {
+      console.error("[SIGNAL LOSS] Operational failure:", error);
+      return res.status(500).json({ error: "Communication link severed." });
+    }
   });
 
   // Vite middleware for development

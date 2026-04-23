@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "BlogPost": {
+      "title": "Blog Post",
+      "description": "An intelligence briefing or blog post.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the briefing." },
+        "date": { "type": "string", "format": "date", "description": "The publication date." },
+        "featured_image": { "type": "string", "description": "URL of the featured image." },
+        "description": { "type": "string", "description": "A short summary of the content." },
+        "body": { "type": "string", "description": "The markdown content of the post." },
+        "slug": { "type": "string", "description": "URL-friendly identifier." },
+        "authorId": { "type": "string", "description": "UID of the admin who published it." }
+      },
+      "required": ["title", "date", "body", "slug"]
+    },
+    "Admin": {
+      "title": "Administrator",
+      "description": "System administrator profile.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin"] }
+      }
+    }
+  },
+  "firestore": {
+    "/blog_posts/{postId}": {
+      "schema": "BlogPost",
+      "description": "Publicly accessible intelligence reports."
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Protected administrator records."
+    }
+  }
+}

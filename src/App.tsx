@@ -5,8 +5,26 @@
 
 import React, { useState, useEffect, useRef, useMemo, ReactNode } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
-import matter from 'gray-matter';
 import ReactMarkdown from 'react-markdown';
+import { 
+  auth, 
+  db, 
+  googleProvider, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  User,
+  Timestamp
+} from './lib/firebase';
+import { getDoc } from 'firebase/firestore';
 import { 
   ChevronDown, 
   Menu, 
@@ -29,8 +47,9 @@ import {
   Plus,
   Check,
   MapPin,
-  Loader2,
-  Zap
+   Loader2,
+  Zap,
+  Download
 } from 'lucide-react';
 
 // --- Types ---
@@ -48,15 +67,18 @@ type PageId =
   | 'blog'
   | 'privacy'
   | 'terms'
-  | 'blog-post';
+  | 'blog-post'
+  | 'admin';
 
 interface BlogPost {
+  id?: string;
   slug: string;
   title: string;
   date: string;
   featured_image: string;
   description: string;
   body: string;
+  authorId?: string;
 }
 
 interface Subject {
@@ -1327,34 +1349,15 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => (
         >
           <div className="space-y-4">
             <h3 className="text-5xl italic tracking-tighter text-white uppercase leading-none">Initialize <br /> Message</h3>
-            <p className="text-white/70 font-medium italic">Verify your intent and deployment target. Direct routing to help@degreegate.com.</p>
+            <p className="text-white/70 font-medium italic">Verify your intent and deployment target. Direct routing via Netlify Intelligence.</p>
           </div>
           <form 
+            name="contact"
+            method="POST"
+            data-netlify="true"
             className="space-y-10" 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const data = Object.fromEntries(formData);
-              
-              try {
-                const response = await fetch('/api/contact', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(data),
-                });
-                
-                if (response.ok) {
-                  alert('SIGNAL SENT. Intelligence routed to help@degreegate.com. Expect extraction within 24 hours.');
-                  (e.target as HTMLFormElement).reset();
-                } else {
-                  alert('SIGNAL COLLISION. Operational error in routing intelligence. Retry signal.');
-                }
-              } catch (error) {
-                console.error('Tactical comms failure:', error);
-                alert('CHANNEL FAILURE. Intel path blocked. Check your connection or retry later.');
-              }
-            }}
           >
+            <input type="hidden" name="form-name" value="contact" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">First Name</label>
@@ -1416,12 +1419,12 @@ const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, 
             className="geometric-card bg-white border-slate-200 p-10 space-y-8 group hover:border-yellow-400 transition-all shadow-sm cursor-pointer"
           >
             <div className="aspect-video bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-100">
-               <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
+               <img src={post.featured_image || 'https://picsum.photos/seed/degreegate/800/600'} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
             </div>
             <div className="space-y-4">
               <div className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">{new Date(post.date).toLocaleDateString()}</div>
               <h3 className="text-2xl font-black text-slate-900 italic uppercase leading-tight group-hover:text-yellow-600 transition-colors">{post.title}</h3>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed italic">{post.description}</p>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed italic line-clamp-3">{post.description}</p>
             </div>
             <button className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors flex items-center gap-3">
               Decrypt Full Story <ArrowRight size={14} />
@@ -1511,35 +1514,423 @@ const TermsView = () => (
   </div>
 );
 
+const AdminPortal = ({ posts }: { posts: BlogPost[] }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newPost, setNewPost] = useState<Partial<BlogPost>>({
+    title: '',
+    date: new Date().toISOString().split('T')[0],
+    featured_image: '',
+    description: '',
+    body: ''
+  });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) {
+        const adminDoc = await getDoc(doc(db, 'admins', u.uid));
+        setIsAdmin(adminDoc.exists() || u.email === 'raajveernildz@gmail.com');
+      } else {
+        setIsAdmin(false);
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e) {
+      console.error('Login Signal Failure:', e);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+    setLoading(true);
+    try {
+      const slug = newPost.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'briefing-' + Date.now();
+      await addDoc(collection(db, 'blog_posts'), {
+        ...newPost,
+        slug,
+        authorId: user?.uid,
+        createdAt: Timestamp.now()
+      });
+      setIsCreating(false);
+      setNewPost({ title: '', date: new Date().toISOString().split('T')[0], featured_image: '', description: '', body: '' });
+    } catch (e) {
+      console.error('Extraction Failure:', e);
+      alert('SIGNAL COLLISION: Could not deploy intelligence.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('PERMANENT DATA ERASURE: Are you sure?')) return;
+    try {
+      await deleteDoc(doc(db, 'blog_posts', id));
+    } catch (e) {
+      console.error('Deletion Failure:', e);
+    }
+  };
+
+  const downloadLogo = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Draw background
+    ctx.clearRect(0, 0, 1024, 1024);
+    
+    // Create the rotated square
+    ctx.save();
+    ctx.translate(512, 512);
+    ctx.rotate(12 * Math.PI / 180);
+    ctx.fillStyle = '#FACC15'; 
+    
+    const size = 720;
+    const radius = 160;
+    ctx.beginPath();
+    ctx.roundRect(-size/2, -size/2, size, size, radius);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(512, 512);
+    ctx.scale(18, 18);
+    ctx.fillStyle = '#000000';
+    
+    ctx.beginPath();
+    ctx.moveTo(0, -10);
+    ctx.lineTo(20, 0);
+    ctx.lineTo(0, 10);
+    ctx.lineTo(-20, 0);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.moveTo(-12, 5);
+    ctx.lineTo(-12, 10);
+    ctx.quadraticCurveTo(0, 15, 12, 10);
+    ctx.lineTo(12, 5);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.moveTo(20, 0);
+    ctx.lineTo(20, 10);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#000000';
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(512, 512);
+    ctx.translate(220, -220);
+    ctx.scale(8, 8);
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-15, 25);
+    ctx.lineTo(5, 25);
+    ctx.lineTo(-10, 50);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    const link = document.createElement('a');
+    link.download = 'degreegate_logo_tactical.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  if (loading) return (
+    <div className="pt-[200px] flex items-center justify-center min-h-screen">
+      <Loader2 className="animate-spin text-yellow-400" size={48} />
+    </div>
+  );
+
+  if (!user || !isAdmin) {
+    return (
+      <div className="bg-black pt-[200px] min-h-screen flex items-center justify-center px-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full geometric-card !bg-white/5 border-white/10 p-12 space-y-10 backdrop-blur-xl"
+        >
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center mx-auto rotate-12 shadow-2xl">
+              <ShieldCheck size={32} className="text-black" />
+            </div>
+            <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">Command <span className="text-yellow-400">Auth.</span></h2>
+            <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Secure Administrative Access</p>
+          </div>
+          
+          <div className="space-y-6">
+            {!user ? (
+              <button 
+                onClick={handleLogin}
+                className="geometric-button-primary w-full !py-6 !rounded-full italic bg-yellow-400 text-black hover:bg-white transition-all shadow-xl flex items-center justify-center gap-3"
+              >
+                <Globe size={18} /> Authenticate with Google
+              </button>
+            ) : (
+              <div className="text-center space-y-4">
+                <p className="text-red-500 font-black italic uppercase text-xs">UNAUTHORIZED SIGNAL. ID mismatch.</p>
+                <p className="text-white/40 text-[10px] mt-2">Your UID: {user.uid}</p>
+                <button onClick={handleLogout} className="text-white/40 uppercase text-[10px] font-black underline">Terminate Session</button>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-16">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b-4 border-black pb-12">
+          <div>
+            <div className="geometric-badge bg-black text-white">System Admin: {user.email}</div>
+            <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter mt-4">Intel. <span className="text-yellow-500">Dashboard.</span></h1>
+          </div>
+          <div className="flex gap-4">
+            <button 
+              onClick={downloadLogo}
+              className="geometric-nav-link text-slate-400 hover:text-black !p-0 mr-4 flex items-center gap-2"
+            >
+              <Download size={14} /> Export PNG
+            </button>
+            <button 
+              onClick={() => setIsCreating(!isCreating)}
+              className="geometric-button-primary !py-4 !px-10 text-xs !rounded-full flex items-center gap-3"
+            >
+              {isCreating ? <X size={16} /> : <Plus size={16} />}
+              {isCreating ? 'Abort Operation' : 'Launch New Intel'}
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="geometric-nav-link text-slate-400 hover:text-red-600 !p-0"
+            >
+              Term. Session
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {isCreating && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <form onSubmit={handleCreate} className="geometric-card bg-white border-slate-200 p-12 space-y-8 shadow-2xl">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Intel Title</label>
+                    <input 
+                      required
+                      placeholder="Title of briefing..."
+                      value={newPost.title}
+                      onChange={e => setNewPost({...newPost, title: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Mission Date</label>
+                    <input 
+                      type="date"
+                      required
+                      value={newPost.date}
+                      onChange={e => setNewPost({...newPost, date: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Featured Image Vector (URL)</label>
+                  <input 
+                    placeholder="https://images.unsplash.com/..."
+                    value={newPost.featured_image}
+                    onChange={e => setNewPost({...newPost, featured_image: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Signal Abstract (Short Description)</label>
+                  <textarea 
+                    rows={2}
+                    value={newPost.description}
+                    onChange={e => setNewPost({...newPost, description: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-3xl px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic resize-none"
+                    placeholder="Briefly describe the intel payload..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Briefing Payload (Markdown / Content)</label>
+                  <textarea 
+                    rows={10}
+                    required
+                    value={newPost.body}
+                    onChange={e => setNewPost({...newPost, body: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-6 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic resize-none"
+                    placeholder="# Writing intel... Use markdown standard."
+                  />
+                </div>
+                <div className="flex justify-end gap-4">
+                   <button type="submit" disabled={loading} className="geometric-button-primary !px-16 !py-6 !rounded-full !bg-black !text-white hover:!bg-yellow-400 hover:!text-black transition-all shadow-2xl">
+                      {loading ? 'Encrypting...' : 'Publish Extraction'}
+                   </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="space-y-6">
+          <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-400">Deployed Intelligence Index</h3>
+          <div className="grid gap-4">
+            {posts.map(post => (
+              <div key={post.id} className="geometric-card bg-white border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-black transition-all">
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-14 bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shrink-0">
+                    <img src={post.featured_image} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="font-black italic uppercase text-slate-900 leading-none">{post.title}</h4>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 italic">{new Date(post.date).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div className="flex gap-8 items-center">
+                  <button 
+                    onClick={() => handleDelete(post.id!)}
+                    className="text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors italic"
+                  >
+                    Delete Post
+                  </button>
+                </div>
+              </div>
+            ))}
+            {posts.length === 0 && <div className="p-20 text-center text-slate-300 font-bold italic border-2 border-dashed border-slate-200 rounded-[2rem]">No intelligence deployed in this sector.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const NewsletterPipeline = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    setStatus('loading');
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setStatus('success');
+        setMessage('PIPELINE SECURED. Welcome to the network.');
+        setEmail('');
+      } else {
+        setStatus('error');
+        setMessage(data.error || 'Signal interference.');
+      }
+    } catch (error) {
+      setStatus('error');
+      setMessage('Communication link severed.');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Newsletter Pipeline</h4>
+      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter italic leading-relaxed">
+        {status === 'success' ? message : 'Secure your position in the first wave of academic intelligence.'}
+      </p>
+      
+      {status !== 'success' && (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input 
+            required
+            type="email" 
+            placeholder="ENCRYPTED EMAIL" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={status === 'loading'}
+            className="bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[10px] font-bold focus:border-yellow-500 outline-none flex-1 transition-all text-slate-900 italic focus:bg-slate-100 disabled:opacity-50" 
+          />
+          <button 
+            type="submit"
+            disabled={status === 'loading'}
+            className="bg-slate-900 text-white p-2.5 rounded-lg hover:bg-yellow-400 hover:text-black transition-all shadow-lg flex items-center justify-center disabled:opacity-50 min-w-[42px]"
+          >
+            {status === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+          </button>
+        </form>
+      )}
+      
+      {status === 'error' && (
+        <p className="text-red-500 text-[9px] font-black uppercase italic">{message}</p>
+      )}
+      
+      {status === 'success' && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 text-green-600 text-[10px] font-black uppercase italic"
+        >
+          <ShieldCheck size={14} /> Mission Accomplished
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
 // --- Main App ---
 
 export default function App() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isBooting, setIsBooting] = useState(true);
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
   const [activePostSlug, setActivePostSlug] = useState<string | null>(null);
 
-  const posts = useMemo(() => {
-    const blogFiles = (import.meta as any).glob('/content/blog/*.md', { as: 'raw', eager: true });
-    return Object.entries(blogFiles).map(([path, content]) => {
-      // Basic frontmatter parser if matter (browser version) has issues with Buffer
-      // Adding a try-catch to ensure robustness
-      try {
-        const { data, content: body } = matter(content as string);
-        const slug = path.split('/').pop()?.replace('.md', '') || '';
-        return {
-          slug,
-          title: data.title || 'Untitled Report',
-          date: data.date || new Date().toISOString(),
-          featured_image: data.featured_image || 'https://picsum.photos/seed/degreegate/800/600',
-          description: data.description || 'Intelligence briefing description pending.',
-          body: body || ''
-        };
-      } catch (e) {
-        console.error('Extraction failed for:', path, e);
-        return null;
-      }
-    }).filter(Boolean).sort((a, b) => new Date(b!.date).getTime() - new Date(a!.date).getTime()) as BlogPost[];
+  useEffect(() => {
+    // Firebase Intelligence Subscription
+    const q = query(collection(db, 'blog_posts'), orderBy('date', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const p = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as BlogPost[];
+      setPosts(p);
+    });
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -1570,6 +1961,7 @@ export default function App() {
         const post = posts.find(p => p.slug === activePostSlug);
         return post ? <BlogPostView post={post} setPage={setView} /> : <BlogView posts={posts} setPage={setView} />;
       }
+      case 'admin': return <AdminPortal posts={posts} />;
       case 'privacy': return <PrivacyView />;
       case 'terms': return <TermsView />;
       default: return <HomeView setPage={setView} />;
@@ -1649,26 +2041,16 @@ export default function App() {
               </ul>
             </div>
 
-            <div className="space-y-6">
-              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
-              <ul className="space-y-3">
-                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
-                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Newsletter Pipeline</h4>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter italic leading-relaxed">Secure your position in the first wave of academic intelligence.</p>
-              <div className="flex gap-2">
-                <input name="newsletter_email" type="email" placeholder="ENCRYPTED EMAIL" className="bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[10px] font-bold focus:border-yellow-500 outline-none flex-1 transition-all text-slate-900 italic focus:bg-slate-100" />
-                <button 
-                  onClick={() => alert('PIPELINE SECURED. You have been added to the intelligence flow.')}
-                  className="bg-slate-900 text-white p-2.5 rounded-lg hover:bg-yellow-400 hover:text-black transition-all shadow-lg"
-                >
-                  <ArrowRight size={16} />
-                </button>
+            <div className="space-y-12">
+              <div className="space-y-6">
+                <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
+                <ul className="space-y-3">
+                  <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
+                  <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
+                  <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-slate-500/30 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
+                </ul>
               </div>
+              <NewsletterPipeline />
             </div>
           </div>
           
