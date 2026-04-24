@@ -16,8 +16,8 @@ async function startServer() {
     res.json({ status: "OPERATIONAL", timestamp: new Date().toISOString() });
   });
 
-  // Admin Authentication Pipeline
-  app.post("/api/admin/auth", (req, res) => {
+  // Admin Authentication Pipeline (Universal for Local and Netlify)
+  app.post(["/api/admin/auth", "/api/admin-auth"], (req, res) => {
     const { password } = req.body;
     let adminPassword = process.env.ADMIN_PASSWORD;
 

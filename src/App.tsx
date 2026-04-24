@@ -1543,7 +1543,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/auth', {
+      const response = await fetch('/api/admin-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
