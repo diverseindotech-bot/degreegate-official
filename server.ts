@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import axios from "axios";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 
@@ -31,6 +32,51 @@ async function startServer() {
       return res.json({ success: true, token: "tactical-session-" + Date.now() });
     } else {
       return res.status(401).json({ error: "REJECTED. Authentication signal mismatch." });
+    }
+  });
+
+  // Brevo Gateway Signup Pipeline
+  app.post("/api/gateway-signup", async (req, res) => {
+    const { firstName, lastName, email, university, country } = req.body;
+    const apiKey = process.env.BREVO_API_KEY;
+
+    if (!apiKey) {
+      console.error("[SIGNAL ERROR] BREVO_API_KEY is missing");
+      return res.status(500).json({ error: "Brevo API key not configured on server." });
+    }
+
+    try {
+      await axios.post(
+        "https://api.brevo.com/v3/contacts",
+        {
+          email,
+          attributes: {
+            FIRSTNAME: firstName,
+            LASTNAME: lastName,
+            UNIVERSITY: university,
+            COUNTRY: country,
+          },
+          // We assume the user has a list for them. 
+          // If the list ID is unknown, we omit listIds to add to default or 
+          // user can update this ID later.
+          // listIds: [2] 
+        },
+        {
+          headers: {
+            'api-key': apiKey,
+            'content-type': 'application/json'
+          }
+        }
+      );
+      res.json({ success: true, message: "Welcome to DegreeGate Gateway. Check your inbox soon." });
+    } catch (error: any) {
+      console.error("[BREVO ERROR]", error.response?.data || error.message);
+      // Even if it fails (e.g. contact already exists), we might want to return success to the user 
+      // or handle the "already exists" case gracefully.
+      if (error.response?.data?.code === 'duplicate_parameter') {
+        return res.json({ success: true, message: "Welcome back! You're already part of the Gateway." });
+      }
+      res.status(error.response?.status || 500).json({ error: "Failed to connect to gateway protocol." });
     }
   });
 

@@ -8,6 +8,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Hidden forms for Netlify detection -->
+    <form name="contact" data-netlify="true" hidden>
+      <input type="text" name="first_name" />
+      <input type="text" name="last_name" />
+      <input type="email" name="email" />
+      <input type="text" name="subject" />
+      <textarea name="message"></textarea>
+    </form>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

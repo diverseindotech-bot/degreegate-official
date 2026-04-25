@@ -34,7 +34,6 @@ import {
   ShieldCheck, 
   GraduationCap, 
   Briefcase, 
-  Phone, 
   Info, 
   Globe, 
   ExternalLink,
@@ -47,9 +46,11 @@ import {
   Linkedin,
   Plus,
   Check,
-  MapPin,
    Loader2,
   Zap,
+  Tv,
+  Users,
+  Star,
   Download,
   Lock
 } from 'lucide-react';
@@ -555,7 +556,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
 
 // --- View Components ---
 
-const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) => {
+const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) => void, formatPrice: (b: number) => string }) => {
   return (
     <div className="flex flex-col bg-transparent w-full overflow-x-hidden pt-0">
       {/* Section 0: Hero Section - The "Creators" Layout */}
@@ -627,7 +628,7 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
               { 
                 id: 'thesis-shield', 
                 title: 'Thesis Shield', 
-                price: '559 PLN',
+                price: formatPrice(131.5),
                 video: 'https://degreegate.com/wp-content/uploads/2026/04/mmkcard.mov',
                 desc: 'Total milestone security for your final dissertation.',
                 img: 'https://picsum.photos/seed/thesis-tactical/800/600',
@@ -636,7 +637,7 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
               { 
                 id: 'internship-shield', 
                 title: 'Internship Shield', 
-                price: '449 PLN', 
+                price: formatPrice(105), 
                 video: 'https://degreegate.com/wp-content/uploads/2026/04/caed-2.mp4',
                 desc: 'Aggressive professional pipeline for global careers.',
                 img: 'https://picsum.photos/seed/career-tactical/800/600',
@@ -782,8 +783,8 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
             <div className="space-y-6">
               {[
                 { n: '01', t: 'Gateway Hub', d: 'Intelligence & Community', p: 'Free' },
-                { n: '02', t: 'Subject Rescue', d: 'Module Correction Ops', p: '89 PLN' },
-                { n: '03', t: 'Expert Intel', d: '30m Strategic Session', p: '€5.00' },
+                { n: '02', t: 'Subject Rescue', d: 'Module Correction Ops', p: formatPrice(21) },
+                { n: '03', t: 'Expert Intel', d: '30m Strategic Session', p: formatPrice(5) },
                 { n: '04', t: 'Shield Ops', d: 'Full Milestone Armor', p: 'Elite' }
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-8 group cursor-pointer">
@@ -807,7 +808,7 @@ const HomeView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) =>
   );
 };
 
-const ThesisShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
+const ThesisShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => void, formatPrice: (b: number) => string }) => (
   <div className="bg-purple-300">
     <section className="min-h-[65vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-black/5 z-0 h-[65vh] lg:h-[60vh] rounded-b-[4rem] lg:rounded-b-[10rem] shadow-sm backdrop-blur-sm" />
@@ -818,17 +819,23 @@ const ThesisShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
           <p className="text-xl text-black font-black max-w-lg italic underline decoration-white/30 drop-shadow-none">
             3-Month Strategic Academic Architecture. We don't write it for you; we audit the logic, scrub the sources, and prepare your defense.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6">
+          <div className="grid grid-cols-2 gap-8 lg:gap-12 pt-4">
+            <div className="space-y-2">
+              <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Access Fee</div>
+              <div className="text-5xl lg:text-6xl font-black text-black italic leading-none">{formatPrice(131.5)}</div>
+            </div>
+            <div className="space-y-2 border-l border-black/10 pl-8 lg:pl-12">
+              <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Success Rate</div>
+              <div className="text-5xl font-black text-black italic leading-none">100%</div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-6 pt-6">
             <button 
               onClick={() => setPage('contact')}
               className="geometric-button-primary px-12 py-6 text-lg !rounded-2xl shadow-xl shadow-black/20 bg-black border-black text-white hover:bg-black/90"
             >
               Initialize Protection
             </button>
-            <div className="flex flex-col justify-center border-l-2 border-black/40 pl-6">
-              <span className="text-[10px] font-black text-black/50 uppercase tracking-widest">Success Rate</span>
-              <span className="text-xl font-black text-black italic">100% Defended</span>
-            </div>
           </div>
         </div>
         <motion.div 
@@ -873,7 +880,7 @@ const ThesisShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
   </div>
 );
 
-const InternshipShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => (
+const InternshipShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => void, formatPrice: (b: number) => string }) => (
   <div className="bg-yellow-400">
     <section className="min-h-[70vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[80vw] lg:w-[50vw] h-full bg-black/5 -skew-x-12 z-0 backdrop-blur-sm shadow-2xl" />
@@ -901,7 +908,7 @@ const InternshipShieldView = ({ setPage }: { setPage: (p: PageId) => void }) => 
           <div className="grid grid-cols-2 gap-8 lg:gap-12">
             <div className="space-y-2">
               <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Entry Fee</div>
-              <div className="text-5xl lg:text-6xl font-black text-black italic leading-none">449 PLN</div>
+              <div className="text-5xl lg:text-6xl font-black text-black italic leading-none">{formatPrice(105)}</div>
             </div>
             <div className="space-y-2 border-l border-black/10 pl-8 lg:pl-12">
               <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Global Ops</div>
@@ -986,7 +993,7 @@ const CatalogView = ({ setPage }: { setPage: (p: PageId, id?: string) => void })
   </div>
 );
 
-const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage: (p: PageId, id?: string) => void }) => {
+const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: string, setPage: (p: PageId, id?: string) => void, formatPrice: (b: number) => string }) => {
   const subject = SUBJECTS.find(s => s.id === subjectId) || SUBJECTS[0];
   
   return (
@@ -1034,7 +1041,7 @@ const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage:
               </ul>
             </div>
             <div className="pt-12 border-t border-white/10">
-              <div className="text-7xl font-black text-white italic tracking-tighter">89 PLN</div>
+              <div className="text-7xl font-black text-white italic tracking-tighter">{formatPrice(21)}</div>
               <div className="text-[10px] font-black text-white/50 uppercase tracking-widest mt-2">Per Session / Full Asset Delivery</div>
               <button 
                 onClick={() => setPage('contact')}
@@ -1063,7 +1070,7 @@ const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage:
               <h3 className="text-5xl italic leading-none text-white tracking-tighter uppercase drop-shadow-xl">Support <br />Hub</h3>
               <p className="text-lg text-white font-medium leading-relaxed italic drop-shadow-md">Strategic academic oversight for the entire semester. Consistent, reliable, elite.</p>
               <ul className="space-y-6">
-                {['Weekly Strategic Check-ins', 'Resource Distribution Network', 'Live Q&A (Unlimited)', 'Career Alignment Ops'].map(t => (
+                {['Weekly Strategic Check-ins', 'Resource Distribution Network', 'Live Q&A (Unlimited)', 'One-on-one technical, three sessions, 60 minutes', 'Career Alignment Ops'].map(t => (
                   <li key={t} className="flex items-center gap-6 text-sm font-black uppercase tracking-tight text-white italic">
                     <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-accent">
                       <Check size={14} />
@@ -1074,7 +1081,7 @@ const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage:
               </ul>
             </div>
             <div className="pt-12 border-t border-white/10">
-              <div className="text-7xl font-black text-white italic tracking-tighter">179 PLN</div>
+              <div className="text-7xl font-black text-white italic tracking-tighter">{formatPrice(42)}</div>
               <div className="text-[10px] font-black text-white/50 uppercase tracking-widest mt-2">Monthly Retainer / Total Oversight</div>
               <button 
                 onClick={() => setPage('contact')}
@@ -1114,7 +1121,7 @@ const SubjectDetailView = ({ subjectId, setPage }: { subjectId: string, setPage:
   );
 };
 
-const ExpertAdviceView = () => (
+const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string }) => (
   <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black/[0.03] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none">
       Elite
@@ -1142,7 +1149,7 @@ const ExpertAdviceView = () => (
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all" />
             <div className="absolute bottom-8 right-8">
-               <div className="text-5xl font-black text-white italic bg-accent px-10 py-4 rounded-[2rem] shadow-2xl">19 PLN</div>
+               <div className="text-5xl font-black text-white italic bg-accent px-10 py-4 rounded-[2rem] shadow-2xl">{formatPrice(4.5)}</div>
             </div>
           </div>
           <div className="p-10 lg:p-16 space-y-8">
@@ -1188,60 +1195,233 @@ const ExpertAdviceView = () => (
   </div>
 );
 
-const DegreeGatewayView = () => (
-  <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
-    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 lg:gap-32 items-center relative z-10">
-      <div className="space-y-12">
-        <div className="space-y-8">
-          <div className="geometric-badge bg-black text-white">Protocol: Gateway</div>
-          <h1 className="text-6xl sm:text-7xl md:text-9xl leading-[0.8] italic uppercase text-black tracking-tighter drop-shadow-none">Degree <br /><span className="text-white underline decoration-4 underline-offset-[12px]">Gateway.</span></h1>
-          <p className="text-lg md:text-xl text-black font-black italic underline decoration-white/30 leading-relaxed drop-shadow-none">Building the world's most aggressive student shield. Join the first wave of elite recruits for zero-day intelligence and community defense. Total access, zero cost.</p>
+const DegreeGatewayView = () => {
+  const [formData, setFormData] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    university: '',
+    country: ''
+  });
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = React.useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    try {
+      const response = await fetch('/api/gateway-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setStatus('success');
+        setMessage(data.message);
+      } else {
+        throw new Error(data.error || 'Failed to request access.');
+      }
+    } catch (err: any) {
+      setStatus('error');
+      setMessage(err.message);
+    }
+  };
+
+  const benefits = [
+    { title: "Free webinars on real student challenges", icon: <Tv size={24} />, color: "bg-blue-500" },
+    { title: "Live Q&A with expert mentors", icon: <Users size={24} />, color: "bg-emerald-500" },
+    { title: "Early access to DegreeGate resources", icon: <Zap size={24} />, color: "bg-amber-500" },
+    { title: "First access to new programs and offers", icon: <Star size={24} />, color: "bg-rose-500" },
+  ];
+
+  const steps = [
+    { n: "01", t: "Apply below in 30 seconds" },
+    { n: "02", t: "Receive exclusive session invites to your inbox" },
+    { n: "03", t: "Grow with the community as Gateway evolves" },
+  ];
+
+  return (
+    <div className="bg-[#f8f9ff] pt-[140px] pb-32 px-6 lg:px-20 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-32">
+        {/* Hero Section */}
+        <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-block px-4 py-1.5 rounded-full bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
+          >
+            PROTOCOL: GATEWAY
+          </motion.div>
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-4xl sm:text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-black leading-[0.9] sm:leading-[0.85]"
+          >
+            Your Access to the <br /> <span className="text-accent underline decoration-4 sm:decoration-8 underline-offset-4 sm:underline-offset-8">DegreeGate Inner Circle.</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg sm:text-xl md:text-2xl text-black/60 font-medium italic max-w-2xl mx-auto leading-relaxed"
+          >
+            An exclusive community for international students in Europe. Join the first wave.
+          </motion.p>
         </div>
 
-        <div className="p-10 geometric-card border-black relative group overflow-visible !bg-black/90 backdrop-blur-md rounded-[2.5rem] shadow-xl">
-          <div className="absolute -top-4 -right-4 w-12 h-12 bg-black rounded-xl rotate-12 flex items-center justify-center text-white shadow-2xl">
-            <ShieldCheck size={24} />
-          </div>
-          <div className="relative z-10 space-y-6">
-            <div className="flex items-center gap-4 text-accent">
-               <div className="w-12 h-12 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-accent">
-                 <MessageCircle size={24} />
-               </div>
-               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Next Intelligence Session</span>
+        {/* Benefit Cards Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {benefits.map((b, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="p-8 bg-white border border-black/5 rounded-[2.5rem] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all group"
+            >
+              <div className={`w-14 h-14 ${b.color} rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform`}>
+                {b.icon}
+              </div>
+              <h3 className="text-lg font-black italic uppercase tracking-tight leading-tight text-black">{b.title}</h3>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* How It Works */}
+        <div className="grid lg:grid-cols-2 gap-16 md:gap-24 items-start">
+          <div className="space-y-10 md:space-y-16">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 md:gap-4 text-center sm:text-left justify-center sm:justify-start">
+                <Star className="hidden sm:block text-accent fill-accent" size={32} />
+                <h2 className="text-4xl sm:text-5xl md:text-7xl font-black italic uppercase tracking-tighter text-black">How It Works.</h2>
+              </div>
+              <div className="w-24 md:w-32 h-2 md:h-2.5 bg-black rounded-full mx-auto sm:mx-0" />
             </div>
-            <h3 className="text-3xl lg:text-4xl italic text-white leading-tight uppercase tracking-tighter">Scale Your Digital <br /> Academic Asset</h3>
-            <p className="text-white/40 font-black text-[10px] uppercase tracking-[0.3em] group-hover:text-accent transition-colors italic">Thursday, 19:00 CET • Encryption: Open</p>
-            <button className="geometric-button-primary w-full !py-4 text-xs !rounded-xl mt-4 bg-white text-black border-none hover:bg-white/90">Apply for Access</button>
+            <div className="space-y-10 md:space-y-12">
+              {steps.map((s, i) => (
+                <div key={i} className="flex gap-6 sm:gap-10 group items-start">
+                  <div className="text-5xl sm:text-6xl font-black text-black/5 group-hover:text-accent/20 transition-colors italic leading-none">{s.n}</div>
+                  <div className="pt-1 md:pt-2">
+                    <p className="text-xl sm:text-2xl font-black italic text-black leading-tight uppercase tracking-tight max-w-md">{s.t}</p>
+                  </div>
+                </div>
+              ))}
+              
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => document.getElementById('signup-form')?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-full sm:w-auto flex items-center justify-center gap-4 px-10 py-6 bg-black text-white font-black italic uppercase tracking-widest text-sm rounded-2xl shadow-2xl hover:bg-slate-900 transition-all border-b-4 border-accent"
+              >
+                <Star size={18} className="fill-accent text-accent" />
+                Begin Application Now
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Signup Form */}
+          <div id="signup-form" className="p-8 sm:p-10 lg:p-16 bg-black rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 blur-[100px] -translate-y-1/2 translate-x-1/2" />
+            
+            {status === 'success' ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center space-y-6 py-10 sm:py-20"
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto shadow-lg shadow-green-500/20">
+                  <Check size={32} />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black italic uppercase text-white tracking-tighter">{message}</h3>
+                <button 
+                  onClick={() => setStatus('idle')}
+                  className="text-accent underline font-black uppercase text-[10px] sm:text-xs tracking-widest italic"
+                >
+                  Apply another contact
+                </button>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">First Name</label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="ENTER"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                      value={formData.firstName}
+                      onChange={e => setFormData({...formData, firstName: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">Last Name</label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="ENTER"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                      value={formData.lastName}
+                      onChange={e => setFormData({...formData, lastName: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">Email Address</label>
+                  <input 
+                    required
+                    type="email" 
+                    placeholder="name@university.com"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">University Name</label>
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="ENTER UNIVERSITY"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    value={formData.university}
+                    onChange={e => setFormData({...formData, university: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">Country</label>
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="ENTER COUNTRY"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    value={formData.country}
+                    onChange={e => setFormData({...formData, country: e.target.value})}
+                  />
+                </div>
+                
+                <div className="pt-4">
+                  <button 
+                    disabled={status === 'loading'}
+                    className="w-full bg-accent hover:bg-accent-light text-black font-black py-6 rounded-2xl transition-all uppercase tracking-widest italic text-sm relative overflow-hidden group disabled:opacity-50"
+                  >
+                    {status === 'loading' ? 'ENCRYPTING DATA...' : 'REQUEST ACCESS'}
+                  </button>
+                  <p className="text-[10px] text-white/30 text-center mt-6 uppercase tracking-widest italic font-bold">Once you join you will receive all updates and invites directly to your inbox.</p>
+                </div>
+                {status === 'error' && (
+                  <p className="text-rose-500 text-[10px] font-bold text-center uppercase tracking-widest italic mt-4">{message}</p>
+                )}
+              </form>
+            )}
           </div>
         </div>
-
-        <button className="geometric-button-secondary w-full px-16 py-8 text-xl shadow-2xl border-white/10 italic !rounded-[2rem] !text-white hover:!bg-white hover:!text-primary transition-all">Initialize Network Scan</button>
-      </div>
-
-      <div className="relative perspective-1000">
-        <div className="grid grid-cols-2 gap-8 relative z-10">
-          <motion.div 
-            animate={{ y: [0, -40, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            whileHover={{ scale: 1.05, rotateY: 10 }}
-            className="geometric-card h-[350px] lg:h-[500px] overflow-hidden rounded-[3rem] lg:rounded-[5rem] shadow-[0_40px_80px_-15px_rgba(99,102,241,0.1)] border-none"
-          >
-            <img src="https://picsum.photos/seed/webinar-1/600/800" className="w-full h-full object-cover transition-transform duration-[3000ms]" referrerPolicy="no-referrer" />
-          </motion.div>
-          <motion.div 
-            animate={{ y: [0, 40, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            whileHover={{ scale: 1.05, rotateY: -10 }}
-            className="geometric-card h-[400px] lg:h-[550px] overflow-hidden rounded-[3rem] lg:rounded-[5rem] shadow-[0_50px_100px_-20px_rgba(99,102,241,0.15)] !border-none self-center p-0 !bg-accent-light"
-          >
-            <img src="https://picsum.photos/seed/webinar-2/600/800" className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
-          </motion.div>
-        </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full lg:w-[150%] h-96 bg-accent opacity-5 rounded-full blur-[120px] pointer-events-none" />
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const AboutView = () => (
   <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
@@ -1268,8 +1448,8 @@ const AboutView = () => (
           <div className="relative geometric-card overflow-hidden bg-black/40 border-none shadow-3xl rounded-[4rem] lg:rounded-[6rem] aspect-[4/5] p-2 backdrop-blur-md">
             <img src="https://picsum.photos/seed/operational-hq/1200/1500" className="w-full h-full object-cover rounded-[3.5rem] lg:rounded-[5.5rem] group-hover:scale-110 transition-transform duration-[3000ms]" referrerPolicy="no-referrer" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-12 lg:p-20">
-              <h4 className="text-4xl text-white italic tracking-tighter uppercase mb-4">HQ Deployment</h4>
-              <p className="text-accent text-sm font-black uppercase tracking-widest">Warsaw Operational Hub 01</p>
+              <h4 className="text-4xl text-white italic tracking-tighter uppercase mb-4">Strategic Capacity</h4>
+              <p className="text-accent text-sm font-black uppercase tracking-widest">Global Operational Readiness</p>
             </div>
           </div>
         </motion.div>
@@ -1291,24 +1471,71 @@ const AboutView = () => (
   </div>
 );
 
-const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => (
+const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus('loading');
+    
+    const formData = new FormData(e.currentTarget);
+    const data = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      data.append(key, value.toString());
+    }
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: data.toString(),
+      });
+
+      if (response.ok) {
+        setStatus('success');
+      } else {
+        setStatus('error');
+      }
+    } catch (error) {
+      setStatus('error');
+    }
+  };
+
+  if (status === 'success') {
+    return (
+      <div className="bg-purple-300 pt-[200px] min-h-screen flex items-center justify-center px-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full geometric-card !bg-white p-12 space-y-8 text-center"
+        >
+          <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto text-green-600">
+            <ShieldCheck size={48} />
+          </div>
+          <h2 className="text-4xl font-black italic uppercase text-slate-900 tracking-tighter">Message <span className="text-yellow-600">Sent.</span></h2>
+          <p className="text-slate-500 font-bold italic">Thank you for contacting us. We have received your message.</p>
+          <button onClick={() => setPage('home')} className="geometric-button-primary w-full !py-6 !rounded-full italic">Back to Home</button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
   <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.05),transparent)]" />
     <div className="max-w-7xl mx-auto relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32">
         <div className="space-y-16">
           <div className="space-y-8">
-            <div className="geometric-badge bg-black text-white">Encrypted Channel</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[85px] text-black tracking-tighter leading-[0.8] italic uppercase underline decoration-white/30">Contact <br /><span className="text-white">Operations.</span></h1>
-            <p className="text-xl text-black font-black italic underline decoration-white/20 leading-relaxed">Direct communication for high-impact emergencies. We respond to the signal, not the noise.</p>
+            <div className="geometric-badge bg-black text-white">Direct Channel</div>
+            <h1 className="text-6xl sm:text-7xl md:text-[85px] text-black tracking-tighter leading-[0.8] italic uppercase underline decoration-white/30">Contact <br /><span className="text-white">Support.</span></h1>
+            <p className="text-xl text-black font-black italic underline decoration-white/20 leading-relaxed">Get in touch with us. We are here to help you with your academic and career queries.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
             {[
-              { label: 'Strategic HQ', value: 'Warsaw Ops Hub 01', icon: <MapPin /> },
-              { label: 'Intel Signal', value: '+48 555 0192 822', icon: <Phone /> },
+              { label: 'Priority Support', value: '24/7 Global Response', icon: <ShieldCheck /> },
               { label: 'Asset Support', value: <span className="text-base not-italic underline">help@degreegate.com</span>, icon: <GraduationCap /> },
-              { label: 'Response Unit', value: '24/7 Security Window', icon: <ShieldCheck /> }
             ].map((item, i) => (
               <div key={i} className="space-y-4 group cursor-pointer text-black">
                 <div className="flex items-center gap-4 text-black">
@@ -1350,59 +1577,58 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => (
           className="geometric-card p-10 lg:p-20 !bg-black/40 backdrop-blur-md space-y-12 shadow-3xl rounded-[3rem] lg:rounded-[5rem] border-white/10"
         >
           <div className="space-y-4">
-            <h3 className="text-5xl italic tracking-tighter text-white uppercase leading-none">Initialize <br /> Message</h3>
-            <p className="text-white/70 font-medium italic">Verify your intent and deployment target. Direct routing via Netlify Intelligence.</p>
+            <h3 className="text-5xl italic tracking-tighter text-white uppercase leading-none">Contact <br /> Us</h3>
+            <p className="text-white/70 font-medium italic">Please fill out the form below to get in touch with us.</p>
           </div>
           <form 
-            name="contact"
-            method="POST"
-            data-netlify="true"
+            onSubmit={handleSubmit}
             className="space-y-10" 
           >
             <input type="hidden" name="form-name" value="contact" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">First Name</label>
-                <input name="firstName" type="text" required placeholder="Extraction Lead" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <input name="first_name" type="text" required placeholder="Enter your first name" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">Last Name</label>
-                <input name="lastName" type="text" required placeholder="Personnel ID" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <input name="last_name" type="text" required placeholder="Enter your last name" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">University Name</label>
-                <input name="university" type="text" required placeholder="Operational Sector" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">Email Address</label>
+                <input name="email" type="email" required placeholder="Enter your email" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">Intel Path</label>
-                <input name="email" type="email" required placeholder="Email Address" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic">Subject</label>
+                <input name="subject" type="text" required placeholder="Subject of message" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
               </div>
             </div>
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic">Deployment Target</label>
-              <div className="relative">
-                <select name="target" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all appearance-none cursor-pointer italic">
-                  <option>Thesis Shield Deployment</option>
-                  <option>Career Optimization Op</option>
-                  <option>Expert Mentorship Request</option>
-                  <option>General Intelligence Query</option>
-                </select>
-                <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 text-accent pointer-events-none" size={18} />
-              </div>
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic">Message</label>
+              <textarea name="message" required placeholder="Your message..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-[40px] px-10 py-8 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all resize-none placeholder:text-white/20 italic" />
             </div>
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic">Message Payload</label>
-              <textarea name="payload" required placeholder="Specify operational goals..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-[40px] px-10 py-8 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all resize-none placeholder:text-white/20 italic" />
-            </div>
-            <button type="submit" className="geometric-button-primary w-full !py-8 text-xl italic shadow-2xl shadow-accent/20 !rounded-[2.5rem]">Launch Signal</button>
+            
+            {status === 'error' && (
+              <p className="text-red-500 text-[10px] font-black uppercase italic text-center">Something went wrong. Please try again.</p>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={status === 'loading'}
+              className="geometric-button-primary w-full !py-8 text-xl italic shadow-2xl shadow-accent/20 !rounded-[2.5rem] disabled:opacity-50"
+            >
+              {status === 'loading' ? 'Sending...' : 'Submit'}
+            </button>
           </form>
         </motion.div>
       </div>
     </div>
   </div>
-);
+  );
+};
+
 
 const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => (
   <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden">
@@ -1892,6 +2118,49 @@ export default function App() {
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
   const [activePostSlug, setActivePostSlug] = useState<string | null>(null);
 
+  // Currency Logic
+  const [currency, setCurrency] = useState('EUR');
+  const [rates, setRates] = useState<Record<string, number>>({ EUR: 1 });
+  const supportedCurrencies = useMemo(() => ['PLN', 'EUR', 'GBP', 'USD', 'INR', 'UAR', 'SEK', 'NOK', 'CZK', 'HUF'], []);
+
+  useEffect(() => {
+    const fetchCurrencyData = async () => {
+      try {
+        // 1. Detect currency by IP
+        const ipResponse = await fetch('https://ipapi.co/json/');
+        const ipData = await ipResponse.json();
+        const detectedCurrency = ipData.currency?.toUpperCase();
+        
+        if (detectedCurrency && supportedCurrencies.includes(detectedCurrency)) {
+          setCurrency(detectedCurrency);
+        } else {
+          setCurrency('EUR');
+        }
+
+        // 2. Fetch exchange rates (from EUR base)
+        const ratesResponse = await fetch('https://open.er-api.com/v6/latest/EUR');
+        const ratesData = await ratesResponse.json();
+        if (ratesData && ratesData.rates) {
+          setRates(ratesData.rates);
+        }
+      } catch (error) {
+        console.error('Failed to fetch currency/rates:', error);
+      }
+    };
+    fetchCurrencyData();
+  }, [supportedCurrencies]);
+
+  const formatPrice = (eurBase: number) => {
+    const rate = rates[currency] || 1;
+    const converted = eurBase * rate;
+    
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency === 'UAR' ? 'AED' : currency,
+      maximumFractionDigits: 0
+    }).format(converted).replace('AED', 'UAR');
+  };
+
   useEffect(() => {
     // Firebase Intelligence Subscription
     const q = query(collection(db, 'blog_posts'), orderBy('date', 'desc'));
@@ -1919,12 +2188,12 @@ export default function App() {
 
   const renderContent = () => {
     switch (currentPage) {
-      case 'home': return <HomeView setPage={setView} />;
-      case 'thesis-shield': return <ThesisShieldView setPage={setView} />;
-      case 'internship-shield': return <InternshipShieldView setPage={setView} />;
+      case 'home': return <HomeView setPage={setView} formatPrice={formatPrice} />;
+      case 'thesis-shield': return <ThesisShieldView setPage={setView} formatPrice={formatPrice} />;
+      case 'internship-shield': return <InternshipShieldView setPage={setView} formatPrice={formatPrice} />;
       case 'subject-catalog': return <CatalogView setPage={setView} />;
-      case 'subject-detail': return <SubjectDetailView subjectId={activeSubjectId!} setPage={setView} />;
-      case 'expert-advice': return <ExpertAdviceView />;
+      case 'subject-detail': return <SubjectDetailView subjectId={activeSubjectId!} setPage={setView} formatPrice={formatPrice} />;
+      case 'expert-advice': return <ExpertAdviceView formatPrice={formatPrice} />;
       case 'degree-gateway': return <DegreeGatewayView />;
       case 'about': return <AboutView />;
       case 'contact': return <ContactView setPage={setView} />;
@@ -1936,7 +2205,7 @@ export default function App() {
       case 'admin': return <AdminPortal posts={posts} setPage={setView} />;
       case 'privacy': return <PrivacyView />;
       case 'terms': return <TermsView />;
-      default: return <HomeView setPage={setView} />;
+      default: return <HomeView setPage={setView} formatPrice={formatPrice} />;
     }
   };
 
@@ -2029,13 +2298,12 @@ export default function App() {
             </div>
             <div className="flex gap-8">
               {[
-                { icon: <Facebook size={22} />, title: "Facebook" },
-                { icon: <Instagram size={22} />, title: "Instagram" },
-                { icon: <Music2 size={22} />, title: "TikTok" },
-                { icon: <Linkedin size={22} />, title: "LinkedIn" },
-                { icon: <Youtube size={22} />, title: "YouTube" }
+                { icon: <Facebook size={22} />, title: "Facebook", href: "https://www.facebook.com/degreegates?rdid=mbDxmXpoAwgbSkMB&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1863a7eXUv%2F#" },
+                { icon: <X size={22} />, title: "X", href: "https://x.com/degreegates?s=21" },
+                { icon: <Instagram size={22} />, title: "Instagram", href: "https://www.instagram.com/degreegate" },
+                { icon: <Linkedin size={22} />, title: "LinkedIn", href: "https://pl.linkedin.com/company/degreegates" }
               ].map((social, i) => (
-                <a key={i} href="#" className="text-slate-300 hover:text-yellow-500 transition-all hover:scale-110" title={social.title}>{social.icon}</a>
+                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-yellow-500 transition-all hover:scale-110" title={social.title}>{social.icon}</a>
               ))}
             </div>
           </div>
