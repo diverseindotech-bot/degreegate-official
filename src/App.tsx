@@ -1229,10 +1229,10 @@ const DegreeGatewayView = () => {
   };
 
   const benefits = [
-    { title: "Free webinars on real student challenges", icon: <Tv size={24} />, color: "bg-blue-500" },
-    { title: "Live Q&A with expert mentors", icon: <Users size={24} />, color: "bg-emerald-500" },
-    { title: "Early access to DegreeGate resources", icon: <Zap size={24} />, color: "bg-amber-500" },
-    { title: "First access to new programs and offers", icon: <Star size={24} />, color: "bg-rose-500" },
+    { title: "Free webinars on real student challenges", icon: Tv, color: "bg-blue-500" },
+    { title: "Live Q&A with expert mentors", icon: Users, color: "bg-emerald-500" },
+    { title: "Early access to DegreeGate resources", icon: Zap, color: "bg-amber-500" },
+    { title: "First access to new programs and offers", icon: Star, color: "bg-rose-500" },
   ];
 
   const steps = [
@@ -1242,21 +1242,21 @@ const DegreeGatewayView = () => {
   ];
 
   return (
-    <div className="bg-[#f8f9ff] pt-[140px] pb-32 px-6 lg:px-20 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-32">
+    <div className="bg-[#f8f9ff] pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-16 sm:space-y-32">
         {/* Hero Section */}
-        <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+        <div className="text-center space-y-4 sm:space-y-8 max-w-4xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-block px-4 py-1.5 rounded-full bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
+            className="inline-block px-3 py-1 rounded-full bg-black text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
           >
             PROTOCOL: GATEWAY
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-4xl sm:text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-black leading-[0.9] sm:leading-[0.85]"
+            className="text-3xl sm:text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-black leading-[0.95] sm:leading-[0.85]"
           >
             Your Access to the <br /> <span className="text-accent underline decoration-4 sm:decoration-8 underline-offset-4 sm:underline-offset-8">DegreeGate Inner Circle.</span>
           </motion.h1>
@@ -1264,47 +1264,47 @@ const DegreeGatewayView = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-black/60 font-medium italic max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-xl md:text-2xl text-black/60 font-medium italic max-w-2xl mx-auto leading-relaxed"
           >
             An exclusive community for international students in Europe. Join the first wave.
           </motion.p>
         </div>
 
         {/* Benefit Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {benefits.map((b, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="p-8 bg-white border border-black/5 rounded-[2.5rem] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all group"
+              className="p-5 sm:p-8 bg-white border border-black/5 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-[0_10px_30px_-5px_rgba(0,0,0,0.05)] transition-all group"
             >
-              <div className={`w-14 h-14 ${b.color} rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform`}>
-                {b.icon}
+              <div className={`w-10 h-10 sm:w-14 sm:h-14 ${b.color} rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-4 sm:mb-6`}>
+                <b.icon size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-lg font-black italic uppercase tracking-tight leading-tight text-black">{b.title}</h3>
+              <h3 className="text-xs sm:text-lg font-black italic uppercase tracking-tight leading-tight text-black">{b.title}</h3>
             </motion.div>
           ))}
         </div>
 
         {/* How It Works */}
-        <div className="grid lg:grid-cols-2 gap-16 md:gap-24 items-start">
-          <div className="space-y-10 md:space-y-16">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 md:gap-4 text-center sm:text-left justify-center sm:justify-start">
-                <Star className="hidden sm:block text-accent fill-accent" size={32} />
-                <h2 className="text-4xl sm:text-5xl md:text-7xl font-black italic uppercase tracking-tighter text-black">How It Works.</h2>
+        <div className="grid lg:grid-cols-2 gap-12 sm:gap-24 items-start">
+          <div className="space-y-8 sm:space-y-16">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center gap-3 sm:gap-4 justify-start">
+                <Star className="text-accent fill-accent" size={24} />
+                <h2 className="text-3xl sm:text-7xl font-black italic uppercase tracking-tighter text-black">How It Works.</h2>
               </div>
-              <div className="w-24 md:w-32 h-2 md:h-2.5 bg-black rounded-full mx-auto sm:mx-0" />
+              <div className="w-16 sm:w-32 h-1.5 sm:h-2.5 bg-black rounded-full" />
             </div>
-            <div className="space-y-10 md:space-y-12">
+            <div className="space-y-8 sm:space-y-12">
               {steps.map((s, i) => (
-                <div key={i} className="flex gap-6 sm:gap-10 group items-start">
-                  <div className="text-5xl sm:text-6xl font-black text-black/5 group-hover:text-accent/20 transition-colors italic leading-none">{s.n}</div>
-                  <div className="pt-1 md:pt-2">
-                    <p className="text-xl sm:text-2xl font-black italic text-black leading-tight uppercase tracking-tight max-w-md">{s.t}</p>
+                <div key={i} className="flex gap-4 sm:gap-10 group items-start">
+                  <div className="text-4xl sm:text-6xl font-black text-black/5 group-hover:text-accent/20 transition-colors italic leading-none">{s.n}</div>
+                  <div className="pt-0.5 sm:pt-2">
+                    <p className="text-lg sm:text-2xl font-black italic text-black leading-tight uppercase tracking-tight max-w-sm">{s.t}</p>
                   </div>
                 </div>
               ))}
@@ -1313,16 +1313,16 @@ const DegreeGatewayView = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => document.getElementById('signup-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto flex items-center justify-center gap-4 px-10 py-6 bg-black text-white font-black italic uppercase tracking-widest text-sm rounded-2xl shadow-2xl hover:bg-slate-900 transition-all border-b-4 border-accent"
+                className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 sm:px-10 sm:py-6 bg-black text-white font-black italic uppercase tracking-widest text-[10px] sm:text-sm rounded-2xl shadow-xl hover:bg-slate-900 transition-all border-b-4 border-accent"
               >
-                <Star size={18} className="fill-accent text-accent" />
+                <Star size={16} className="fill-accent text-accent" />
                 Begin Application Now
               </motion.button>
             </div>
           </div>
 
           {/* Signup Form */}
-          <div id="signup-form" className="p-8 sm:p-10 lg:p-16 bg-black rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
+          <div id="signup-form" className="p-6 sm:p-10 lg:p-16 bg-black rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 blur-[100px] -translate-y-1/2 translate-x-1/2" />
             
             {status === 'success' ? (
