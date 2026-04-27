@@ -7,22 +7,45 @@
   --font-accent: "Anton", sans-serif;
   --font-serif: "Playfair Display", serif;
   
-  --color-primary: #1e40af;
-  --color-accent: #3b82f6;
-  --color-accent-light: #dbeafe;
-  --color-text-main: #1e1b4b;
-  --color-text-muted: #1d4ed8;
-  --color-border: #bfdbfe;
-  --color-bg: #eff6ff;
+  --color-primary: var(--primary-color);
+  --color-accent: var(--accent-color);
+  --color-accent-light: var(--accent-light);
+  --color-text-main: var(--text-primary);
+  --color-text-muted: var(--text-secondary);
+  --color-border: var(--border-color);
+  --color-bg: var(--bg-color);
   --color-cta: #ff4500;
+}
+
+:root {
+  --primary-color: #1e40af;
+  --accent-color: #3b82f6;
+  --accent-light: #dbeafe;
+  --bg-color: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --body-gradient: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+}
+
+.dark {
+  --primary-color: #3b82f6;
+  --accent-color: #60a5fa;
+  --accent-light: #1e293b;
+  --bg-color: #020617;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #1e293b;
+  --body-gradient: radial-gradient(circle at top right, #0f172a 0%, #020617 100%);
 }
 
 @layer base {
   body {
-    background: linear-gradient(135deg, #ff006e 0%, #8b00ff 33%, #00bfff 66%, #ffbe00 100%);
+    background: var(--body-gradient);
     background-attachment: fixed;
     background-size: cover;
-    @apply text-white font-sans antialiased m-0 p-0 overflow-x-hidden transition-colors duration-500;
+    color: var(--text-primary);
+    @apply font-sans antialiased m-0 p-0 overflow-x-hidden transition-all duration-500;
   }
   
   h1, h2, h3 {
@@ -35,11 +58,11 @@
 }
 
 @utility geometric-card {
-  @apply bg-black/60 backdrop-blur-md border-[4px] border-yellow-400 rounded-[2rem] shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-all duration-500 hover:shadow-[0_20px_40px_rgba(255,190,0,0.2)] hover:translate-y-[-8px] overflow-hidden text-white;
+  @apply bg-white dark:bg-slate-900 border-[1px] dark:border-[1px] border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-[0_5px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:translate-y-[-8px] overflow-hidden text-slate-900 dark:text-white;
 }
 
 @utility geometric-card-featured {
-  @apply bg-black/70 backdrop-blur-xl text-white border-4 border-accent rounded-[3rem] shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:translate-y-[-12px] overflow-hidden;
+  @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-white border-2 border-accent dark:border-primary rounded-[3rem] shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] hover:translate-y-[-12px] overflow-hidden;
 }
 
 @utility geometric-button-primary {
@@ -67,7 +90,7 @@
 }
 
 @utility geometric-container {
-  @apply relative bg-bg min-h-screen flex flex-col selection:bg-accent selection:text-white scroll-smooth;
+  @apply relative min-h-screen flex flex-col selection:bg-accent selection:text-white scroll-smooth transition-colors duration-500;
 }
 
 @utility geometric-nav-link {

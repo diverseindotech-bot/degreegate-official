@@ -52,7 +52,11 @@ import {
   Users,
   Star,
   Download,
-  Lock
+  Lock,
+  Cpu,
+  Sun,
+  Moon,
+  Settings
 } from 'lucide-react';
 
 // --- Types ---
@@ -186,7 +190,7 @@ const TacticalLoader: React.FC<{ onComplete: () => void }> = ({ onComplete }) =>
 };
 
 const ProblemSection = () => (
-  <section className="py-20 px-6 lg:px-20 relative overflow-hidden bg-yellow-400 border-y border-black/5">
+  <section className="py-32 px-6 lg:px-20 relative overflow-hidden bg-yellow-400 dark:bg-slate-950 border-y border-black/5 dark:border-white/5 transition-colors duration-500">
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
@@ -194,13 +198,13 @@ const ProblemSection = () => (
         viewport={{ once: true }}
         className="text-center"
       >
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase leading-tight max-w-4xl mx-auto text-black drop-shadow-none flex items-center justify-center gap-6">
-          <Zap className="text-black fill-black hidden md:block" size={48} />
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase leading-tight max-w-4xl mx-auto text-black dark:text-white flex items-center justify-center gap-6">
+          <Zap className="text-black dark:text-accent fill-current hidden md:block" size={48} />
           “European universities weren’t built with you in mind.”
         </h2>
       </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-12">
         {[
           "One failed subject can cost you an entire year. Retake deadlines, conditional enrollment, scholarship conditions — severe consequences nobody explains upfront.",
           "Your professors are busy. Your family is far away. Office hours are in a language you’re still learning. Google gives you answers for the wrong country.",
@@ -212,7 +216,7 @@ const ProblemSection = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.2 }}
-            className="geometric-card !bg-black/80 backdrop-blur-md p-10 space-y-6 hover:border-black/40"
+            className="geometric-card !bg-black/90 dark:!bg-white/5 backdrop-blur-md p-10 space-y-6 hover:scale-105 transition-transform"
           >
             <div className="text-accent text-5xl font-black italic opacity-40">{i + 1}</div>
             <p className="text-lg md:text-xl font-medium italic leading-relaxed text-white">
@@ -228,7 +232,7 @@ const ProblemSection = () => (
         viewport={{ once: true }}
         className="text-center"
       >
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase text-white drop-shadow-2xl">
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase text-white dark:text-accent drop-shadow-2xl">
           “DegreeGate was.”
         </h2>
       </motion.div>
@@ -319,20 +323,13 @@ const Sticker = ({ text, className = "" }: { text: string; className?: string })
 const Navbar = ({ 
   activePage, 
   setPage, 
-  currency, 
-  setCurrency, 
-  supportedCurrencies 
 }: { 
   activePage: PageId, 
   setPage: (p: PageId, id?: string) => void, 
-  currency: string, 
-  setCurrency: (c: string) => void, 
-  supportedCurrencies: string[] 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [shieldsOpen, setShieldsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -351,45 +348,47 @@ const Navbar = ({
     };
   }, [isOpen]);
 
-  // Text color logic: Always white for the hero feel, or slight tint on scroll
-  const navTextColor = "text-white drop-shadow-md";
+  // Text color logic: Dynamic based on theme or context
+  const navTextColor = scrolled ? "text-slate-900 dark:text-white" : "text-white";
+  const navBgColor = isOpen 
+    ? 'bg-white dark:bg-slate-900' 
+    : scrolled 
+      ? 'backdrop-blur-xl bg-white/80 dark:bg-black/80' 
+      : 'backdrop-blur-sm bg-black/20';
 
   return (
     <header 
       className={`h-[100px] fixed top-0 left-0 right-0 transition-all duration-500 flex items-center ${
-        isOpen 
-          ? 'z-[99999] bg-white shadow-2xl' 
-          : scrolled 
-            ? 'z-[100] backdrop-blur-xl bg-black/40 h-[80px] shadow-2xl border-b border-white/5' 
-            : 'z-[100] backdrop-blur-sm bg-black/20'
-      }`}
+        scrolled ? 'h-[80px] shadow-2xl border-b border-black/5 dark:border-white/5' : ''
+      } ${navBgColor} z-[1000]`}
     >
-      <div className="max-w-[1400px] w-full mx-auto flex items-center justify-between px-6 lg:px-12 relative z-[100001]">
+      <div className="max-w-[1400px] w-full mx-auto flex items-center gap-12 lg:gap-20 px-6 lg:px-12 relative z-[100001]">
+        {/* LOGO SECTION - Left Aligned */}
         <div 
-          className="flex items-center gap-4 cursor-pointer group"
+          className="flex items-center gap-4 cursor-pointer group flex-shrink-0"
           onClick={() => { setPage('home'); setIsOpen(false); }}
         >
-          <div className="w-12 h-12 bg-yellow-400 rounded-2xl rotate-12 flex items-center justify-center shadow-xl shadow-yellow-400/20 group-hover:rotate-0 transition-transform duration-500">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-400 rounded-2xl rotate-12 flex items-center justify-center shadow-xl shadow-yellow-400/20 group-hover:rotate-0 transition-transform duration-500">
             <div className="relative">
               <GraduationCap size={24} className="text-black" />
               <Zap size={14} className="text-black absolute -top-2 -right-2 fill-black" />
             </div>
           </div>
           <div className="flex flex-col">
-            <div className={`font-display text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${isOpen ? 'text-slate-900' : navTextColor}`}>
+            <div className={`font-display text-[22px] sm:text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${isOpen ? 'text-slate-900 dark:text-white' : navTextColor}`}>
               DegreeGate<span className="text-yellow-400">.</span>
             </div>
-            <div className={`text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-1 ${isOpen ? 'text-slate-400' : 'text-white/50'}`}>Intelligence Gate</div>
+            <div className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-1 ${isOpen ? 'text-slate-400 dark:text-slate-500' : scrolled ? 'text-slate-400' : 'text-white/50'}`}>Intelligence Gate</div>
           </div>
         </div>
 
-        {/* Desktop Menu */}
-        <nav className="hidden lg:flex items-center gap-10">
-          <button onClick={() => setPage('home')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'home' ? 'after:w-full' : ''}`}>Base</button>
+        {/* Desktop Menu - Brought closer to logo */}
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-10 ml-12 xl:ml-20">
+          <button onClick={() => setPage('home')} className={`geometric-nav-link ${activePage === 'home' ? 'after:w-full' : ''} ${navTextColor}`}>Base</button>
           
           <div className="relative group/dropdown">
             <button 
-              className={`geometric-nav-link flex items-center gap-2 !text-white drop-shadow-md ${activePage.includes('shield') ? 'after:w-full' : ''}`}
+              className={`geometric-nav-link flex items-center gap-2 ${activePage.includes('shield') ? 'after:w-full' : ''} ${navTextColor}`}
               onMouseEnter={() => setShieldsOpen(true)}
               onMouseLeave={() => setShieldsOpen(false)}
             >
@@ -402,33 +401,31 @@ const Navbar = ({
                   initial={{ opacity: 0, scale: 0.95, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  onMouseEnter={() => setShieldsOpen(true)}
-                  onMouseLeave={() => setShieldsOpen(false)}
-                  className="absolute top-full right-[-20px] bg-black/80 text-white p-4 min-w-[280px] shadow-2xl rounded-[2.5rem] z-[120] mt-4 border border-white/10 backdrop-blur-xl"
+                  className="absolute top-full left-0 bg-white dark:bg-slate-900 p-4 min-w-[280px] shadow-2xl rounded-[2.5rem] z-[120] mt-4 border border-slate-100 dark:border-white/10 backdrop-blur-xl"
                 >
                   <div className="space-y-2">
                     <button 
                       onClick={() => { setPage('thesis-shield'); setShieldsOpen(false); }} 
-                      className="w-full text-left p-4 rounded-2xl hover:bg-white/5 transition-all flex items-center gap-4 group/item"
+                      className="w-full text-left p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all flex items-center gap-4 group/item"
                     >
                       <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
                         <GraduationCap size={20} />
                       </div>
                       <div>
-                        <div className="text-sm font-black uppercase tracking-tight text-white">Thesis Shield</div>
-                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 italic">Academic Armor</div>
+                        <div className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">Thesis Shield</div>
+                        <div className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest mt-1 italic">Academic Armor</div>
                       </div>
                     </button>
                     <button 
                       onClick={() => { setPage('internship-shield'); setShieldsOpen(false); }} 
-                      className="w-full text-left p-4 rounded-2xl hover:bg-white/5 transition-all flex items-center gap-4 group/item"
+                      className="w-full text-left p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all flex items-center gap-4 group/item"
                     >
                       <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
                         <Briefcase size={20} />
                       </div>
                       <div>
-                        <div className="text-sm font-black uppercase tracking-tight text-white">Internship Shield</div>
-                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 italic">Career Pipeline</div>
+                        <div className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">Internship Shield</div>
+                        <div className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest mt-1 italic">Career Pipeline</div>
                       </div>
                     </button>
                   </div>
@@ -437,60 +434,32 @@ const Navbar = ({
             </AnimatePresence>
           </div>
 
-          <button onClick={() => setPage('subject-catalog')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'subject-catalog' ? 'after:w-full' : ''}`}>Subject Hub</button>
-          <button onClick={() => setPage('expert-advice')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'expert-advice' ? 'after:w-full' : ''}`}>Expert Advice</button>
-          <button onClick={() => setPage('degree-gateway')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'degree-gateway' ? 'after:w-full' : ''}`}>Gateway</button>
-          <button onClick={() => setPage('blog')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'blog' ? 'after:w-full' : ''}`}>Blog</button>
-          <button onClick={() => setPage('about')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'about' ? 'after:w-full' : ''}`}>About</button>
-          
-          <div className="relative group/currency">
-            <button 
-              onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}
-              className="geometric-nav-link flex items-center gap-2 !text-white drop-shadow-md"
-            >
-              {currency} <ChevronDown size={12} className={`transition-transform ${currencyMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-            <AnimatePresence>
-              {currencyMenuOpen && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                  className="absolute top-full right-0 mt-4 bg-black/90 backdrop-blur-xl border border-white/10 p-4 rounded-3xl shadow-2xl z-[150] grid grid-cols-2 gap-2 min-w-[200px]"
-                >
-                  {supportedCurrencies.map(c => (
-                    <button 
-                      key={c}
-                      onClick={() => { setCurrency(c); setCurrencyMenuOpen(false); localStorage.setItem('dg-currency', c); }}
-                      className={`px-4 py-2 rounded-xl text-xs font-black italic uppercase transition-all ${
-                        currency === c ? 'bg-yellow-400 text-black' : 'text-white/60 hover:bg-white/10 hover:text-white'
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button onClick={() => setPage('subject-catalog')} className={`geometric-nav-link ${activePage === 'subject-catalog' ? 'after:w-full' : ''} ${navTextColor}`}>Subject Hub</button>
+          <button onClick={() => setPage('expert-advice')} className={`geometric-nav-link ${activePage === 'expert-advice' ? 'after:w-full' : ''} ${navTextColor}`}>Expert Intel</button>
+          <button onClick={() => setPage('degree-gateway')} className={`geometric-nav-link ${activePage === 'degree-gateway' ? 'after:w-full' : ''} ${navTextColor}`}>Gateway</button>
+          <button onClick={() => setPage('blog')} className={`geometric-nav-link ${activePage === 'blog' ? 'after:w-full' : ''} ${navTextColor}`}>Blog</button>
+          <button onClick={() => setPage('about')} className={`geometric-nav-link ${activePage === 'about' ? 'after:w-full' : ''} ${navTextColor}`}>About</button>
+        </nav>
 
+        {/* CTA and Mobile Toggle Area - Pushed to the right */}
+        <div className="flex items-center gap-6 ml-auto">
           <button 
             onClick={() => setPage('contact')}
-            className="geometric-button-primary !py-4 !px-8 text-xs !rounded-full bg-white !text-primary border-none shadow-xl hover:bg-accent-light hover:!text-primary transition-all"
+            className="hidden lg:block geometric-button-primary !py-4 !px-8 text-xs !rounded-full bg-slate-900 dark:bg-white !text-white dark:!text-slate-900 border-none shadow-xl hover:bg-accent dark:hover:bg-accent-light hover:!text-white transition-all whitespace-nowrap"
           >
             Contact Hub
           </button>
-        </nav>
 
-        {/* Mobile Toggle */}
-        <button 
-          className={`lg:hidden w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative z-[100002] ${
-            isOpen ? 'bg-yellow-400 text-black scale-110 shadow-yellow-400/30' : 'bg-black text-white border border-white/20'
-          }`} 
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+          {/* Mobile Toggle */}
+          <button 
+            className={`lg:hidden w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative z-[100002] ${
+              isOpen ? 'bg-yellow-400 text-black scale-110 shadow-yellow-400/30' : 'bg-black text-white border border-white/20'
+            }`} 
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -581,20 +550,6 @@ const Navbar = ({
                 Intelligence Blog
               </motion.button>
 
-              <div className="grid grid-cols-5 gap-2 mt-8 px-4">
-                {supportedCurrencies.map(c => (
-                  <button 
-                    key={c}
-                    onClick={() => { setCurrency(c); localStorage.setItem('dg-currency', c); }}
-                    className={`py-3 rounded-xl text-[10px] font-black italic uppercase transition-all ${
-                      currency === c ? 'bg-yellow-400 text-black' : 'bg-slate-50 text-slate-400'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-
               <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -667,16 +622,16 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
       <ProblemSection />
 
       {/* Section 2: Product Suite (Previously Section 1, reordered to appear after Problem Section) */}
-      <section className="bg-purple-300 text-black py-20 px-6 lg:px-20 overflow-hidden relative border-b border-black/5">
-        <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.1)_1px,transparent_1px)] bg-[size:100px_100px]" />
+      <section className="bg-purple-100 dark:bg-slate-900 text-slate-900 dark:text-white py-32 px-6 lg:px-20 overflow-hidden relative border-b border-slate-200 dark:border-white/5 transition-colors duration-500">
+        <div className="absolute inset-0 opacity-20 dark:opacity-5 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         
         <div className="max-w-7xl mx-auto w-full space-y-20 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-end gap-12 border-b border-black/20 pb-16">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-12 border-b border-black/10 dark:border-white/10 pb-16">
             <div className="space-y-6">
-              <div className="geometric-badge bg-black text-white">Operational Units</div>
-              <h2 className="text-6xl sm:text-7xl md:text-8xl font-black leading-none text-black italic drop-shadow-none">Elite <br /> <span className="text-white underline">Shields</span></h2>
+              <div className="geometric-badge bg-black dark:bg-accent text-white">Operational Units</div>
+              <h2 className="text-6xl sm:text-7xl md:text-8xl font-black leading-none text-slate-900 dark:text-white italic">Elite <br /> <span className="text-accent dark:text-primary underline">Shields</span></h2>
             </div>
-            <p className="max-w-md text-black font-black text-lg italic border-l-4 border-black pl-6 py-2 drop-shadow-none">
+            <p className="max-w-md text-slate-600 dark:text-slate-400 font-bold text-lg italic border-l-4 border-slate-900 dark:border-accent pl-6 py-2">
               Subscription-based bodyguards for your academic and career milestones. Zero failure tolerance.
             </p>
           </div>
@@ -1055,19 +1010,19 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
   const subject = SUBJECTS.find(s => s.id === subjectId) || SUBJECTS[0];
   
   return (
-    <div className="bg-transparent pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative">
+    <div className="bg-bg pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative transition-colors duration-500">
       <div className="max-w-7xl mx-auto space-y-24 relative z-10">
         <div className="space-y-12 max-w-5xl">
           <button 
             onClick={() => setPage('subject-catalog')}
-            className="text-[10px] font-black text-white/50 uppercase tracking-widest hover:text-accent transition-colors flex items-center gap-4 group"
+            className="text-[10px] font-black text-slate-400 dark:text-white/50 uppercase tracking-widest hover:text-accent transition-colors flex items-center gap-4 group"
           >
-            <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
               <ArrowRight className="rotate-180" size={14} />
             </div>
             Protocol Return: Inventory
           </button>
-          <h1 className="text-5xl sm:text-7xl md:text-[10rem] italic leading-[0.7] uppercase underline decoration-accent/10 tracking-tighter text-white drop-shadow-2xl">{subject.name}</h1>
+          <h1 className="text-5xl sm:text-7xl md:text-[10rem] italic leading-[0.7] uppercase underline decoration-accent/10 tracking-tighter text-slate-900 dark:text-white drop-shadow-2xl">{subject.name}</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -1180,21 +1135,21 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
 };
 
 const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string }) => (
-  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen">
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black/[0.03] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none">
+  <div className="bg-yellow-400 dark:bg-slate-950 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen transition-colors duration-500">
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black/[0.03] dark:text-white/[0.02] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none">
       Elite
     </div>
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
-        <div className="geometric-badge mx-auto bg-black text-white">Direct Intel Channel</div>
-        <h1 className="text-6xl sm:text-7xl md:text-9xl leading-[0.8] italic uppercase text-black tracking-tighter drop-shadow-none">Expert <br /><span className="text-white underline decoration-4 underline-offset-[12px]">Advice.</span></h1>
-        <p className="text-xl text-black font-black italic underline decoration-white/30 leading-relaxed drop-shadow-none">30 minutes of brutal, strategic honesty. The information the university doesn't want you to have.</p>
+        <div className="geometric-badge mx-auto bg-black dark:bg-accent text-white">Direct Intel Channel</div>
+        <h1 className="text-6xl sm:text-7xl md:text-9xl leading-[0.8] italic uppercase text-black dark:text-white tracking-tighter drop-shadow-none">Expert <br /><span className="text-white dark:text-accent underline decoration-4 underline-offset-[12px]">Advice.</span></h1>
+        <p className="text-xl text-black dark:text-slate-400 font-black italic underline decoration-white/30 leading-relaxed drop-shadow-none">30 minutes of brutal, strategic honesty. The information the university doesn't want you to have.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
         <motion.div 
           whileHover={{ y: -20, perspective: 1000, rotateY: 5 }}
-          className="geometric-card p-1 flex flex-col justify-between group shadow-xl border-none overflow-hidden rounded-[3rem] lg:rounded-[4rem] !bg-black/40 backdrop-blur-md"
+          className="geometric-card p-1 flex flex-col justify-between group shadow-xl border-none overflow-hidden rounded-[3rem] lg:rounded-[4rem]"
         >
           <div className="relative aspect-[3/4] overflow-hidden bg-black">
             <video 
@@ -1300,21 +1255,21 @@ const DegreeGatewayView = () => {
   ];
 
   return (
-    <div className="bg-[#f8f9ff] pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen">
+    <div className="bg-bg pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen transition-colors duration-500">
       <div className="max-w-7xl mx-auto space-y-16 sm:space-y-32">
         {/* Hero Section */}
         <div className="text-center space-y-4 sm:space-y-8 max-w-4xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-block px-3 py-1 rounded-full bg-black text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
+            className="inline-block px-3 py-1 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
           >
             PROTOCOL: GATEWAY
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-3xl sm:text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-black leading-[0.95] sm:leading-[0.85]"
+            className="text-3xl sm:text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-[0.95] sm:leading-[0.85]"
           >
             Your Access to the <br /> <span className="text-accent underline decoration-4 sm:decoration-8 underline-offset-4 sm:underline-offset-8">DegreeGate Inner Circle.</span>
           </motion.h1>
@@ -1322,7 +1277,7 @@ const DegreeGatewayView = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-base sm:text-xl md:text-2xl text-black/60 font-medium italic max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-xl md:text-2xl text-slate-500 dark:text-slate-400 font-medium italic max-w-2xl mx-auto leading-relaxed"
           >
             An exclusive community for international students in Europe. Join the first wave.
           </motion.p>
@@ -1337,12 +1292,14 @@ const DegreeGatewayView = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="p-5 sm:p-8 bg-white border border-black/5 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-[0_10px_30px_-5px_rgba(0,0,0,0.05)] transition-all group"
+              className="geometric-card p-5 sm:p-8 !rounded-[1.5rem] sm:!rounded-[2.5rem]"
             >
               <div className={`w-10 h-10 sm:w-14 sm:h-14 ${b.color} rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-4 sm:mb-6`}>
                 <b.icon size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-xs sm:text-lg font-black italic uppercase tracking-tight leading-tight text-black">{b.title}</h3>
+              <h3 className="text-xs sm:text-lg font-black italic uppercase tracking-tight leading-tight">
+                {b.title}
+              </h3>
             </motion.div>
           ))}
         </div>
@@ -1353,16 +1310,16 @@ const DegreeGatewayView = () => {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3 sm:gap-4 justify-start">
                 <Star className="text-accent fill-accent" size={24} />
-                <h2 className="text-3xl sm:text-7xl font-black italic uppercase tracking-tighter text-black">How It Works.</h2>
+                <h2 className="text-3xl sm:text-7xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white">How It Works.</h2>
               </div>
-              <div className="w-16 sm:w-32 h-1.5 sm:h-2.5 bg-black rounded-full" />
+              <div className="w-16 sm:w-32 h-1.5 sm:h-2.5 bg-accent rounded-full" />
             </div>
             <div className="space-y-8 sm:space-y-12">
               {steps.map((s, i) => (
                 <div key={i} className="flex gap-4 sm:gap-10 group items-start">
-                  <div className="text-4xl sm:text-6xl font-black text-black/5 group-hover:text-accent/20 transition-colors italic leading-none">{s.n}</div>
+                  <div className="text-4xl sm:text-6xl font-black text-slate-200 dark:text-white/5 group-hover:text-accent/20 transition-colors italic leading-none">{s.n}</div>
                   <div className="pt-0.5 sm:pt-2">
-                    <p className="text-lg sm:text-2xl font-black italic text-black leading-tight uppercase tracking-tight max-w-sm">{s.t}</p>
+                    <p className="text-lg sm:text-2xl font-black italic text-slate-600 dark:text-slate-400 leading-tight uppercase tracking-tight max-w-sm group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{s.t}</p>
                   </div>
                 </div>
               ))}
@@ -1371,7 +1328,7 @@ const DegreeGatewayView = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => document.getElementById('signup-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 sm:px-10 sm:py-6 bg-black text-white font-black italic uppercase tracking-widest text-[10px] sm:text-sm rounded-2xl shadow-xl hover:bg-slate-900 transition-all border-b-4 border-accent"
+                className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 sm:px-10 sm:py-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black italic uppercase tracking-widest text-[10px] sm:text-sm rounded-2xl shadow-xl hover:opacity-90 transition-all border-b-4 border-accent"
               >
                 <Star size={16} className="fill-accent text-accent" />
                 Begin Application Now
@@ -1380,8 +1337,8 @@ const DegreeGatewayView = () => {
           </div>
 
           {/* Signup Form */}
-          <div id="signup-form" className="p-6 sm:p-10 lg:p-16 bg-black rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 blur-[100px] -translate-y-1/2 translate-x-1/2" />
+          <div id="signup-form" className="p-6 sm:p-10 lg:p-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 dark:bg-accent/20 blur-[100px] -translate-y-1/2 translate-x-1/2" />
             
             {status === 'success' ? (
               <motion.div 
@@ -1392,7 +1349,7 @@ const DegreeGatewayView = () => {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto shadow-lg shadow-green-500/20">
                   <Check size={32} />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black italic uppercase text-white tracking-tighter">{message}</h3>
+                <h3 className="text-2xl sm:text-3xl font-black italic uppercase text-slate-900 dark:text-white tracking-tighter">{message}</h3>
                 <button 
                   onClick={() => setStatus('idle')}
                   className="text-accent underline font-black uppercase text-[10px] sm:text-xs tracking-widest italic"
@@ -1404,70 +1361,70 @@ const DegreeGatewayView = () => {
               <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">First Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 italic ml-4">First Name</label>
                     <input 
                       required
                       type="text" 
                       placeholder="ENTER"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                       value={formData.firstName}
                       onChange={e => setFormData({...formData, firstName: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">Last Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 italic ml-4">Last Name</label>
                     <input 
                       required
                       type="text" 
                       placeholder="ENTER"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                       value={formData.lastName}
                       onChange={e => setFormData({...formData, lastName: e.target.value})}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">Email Address</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 italic ml-4">Email Address</label>
                   <input 
                     required
                     type="email" 
                     placeholder="name@university.com"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                     value={formData.email}
                     onChange={e => setFormData({...formData, email: e.target.value})}
                   />
                 </div>
+                {/* ... other form fields ... */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">University Name</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 italic ml-4">University Name</label>
                   <input 
                     required
                     type="text" 
                     placeholder="ENTER UNIVERSITY"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                     value={formData.university}
                     onChange={e => setFormData({...formData, university: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-white/40 italic ml-4">Country</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 italic ml-4">Country</label>
                   <input 
                     required
                     type="text" 
                     placeholder="ENTER COUNTRY"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent transition-colors placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                     value={formData.country}
                     onChange={e => setFormData({...formData, country: e.target.value})}
                   />
                 </div>
-                
                 <div className="pt-4">
                   <button 
                     disabled={status === 'loading'}
-                    className="w-full bg-accent hover:bg-accent-light text-black font-black py-6 rounded-2xl transition-all uppercase tracking-widest italic text-sm relative overflow-hidden group disabled:opacity-50"
+                    className="w-full bg-accent hover:opacity-90 text-white font-black py-6 rounded-2xl transition-all uppercase tracking-widest italic text-sm relative overflow-hidden group disabled:opacity-50"
                   >
                     {status === 'loading' ? 'ENCRYPTING DATA...' : 'REQUEST ACCESS'}
                   </button>
-                  <p className="text-[10px] text-white/30 text-center mt-6 uppercase tracking-widest italic font-bold">Once you join you will receive all updates and invites directly to your inbox.</p>
+                  <p className="text-[10px] text-slate-400 dark:text-white/30 text-center mt-6 uppercase tracking-widest italic font-bold">Once you join you will receive all updates and invites directly to your inbox.</p>
                 </div>
                 {status === 'error' && (
                   <p className="text-rose-500 text-[10px] font-bold text-center uppercase tracking-widest italic mt-4">{message}</p>
@@ -1482,21 +1439,21 @@ const DegreeGatewayView = () => {
 };
 
 const AboutView = () => (
-  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-[80vw] lg:w-[40vw] h-full bg-black/5 border-l border-black/5 z-0 backdrop-blur-sm" />
+  <div className="bg-yellow-400 dark:bg-slate-950 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500">
+    <div className="absolute top-0 right-0 w-[80vw] lg:w-[40vw] h-full bg-black/5 dark:bg-white/5 border-l border-black/5 z-0 backdrop-blur-sm" />
     <div className="max-w-7xl mx-auto space-y-32 relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-center">
         <div className="space-y-12">
           <div className="space-y-8">
-            <div className="geometric-badge bg-black text-white">Operational History</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[108px] leading-[0.7] italic uppercase tracking-tighter text-black drop-shadow-none">The <br /><span className="text-white underline decoration-8 text-[99px]">DegreeGate</span><br /> Narrative.</h1>
-            <p className="text-xl md:text-2xl italic font-black max-w-lg border-l-[12px] border-black pl-10 text-black drop-shadow-none">We didn't start as a business. We started as students who realized the system was built to be broken, and then we mastered the cracks.</p>
+            <div className="geometric-badge bg-black dark:bg-white text-white dark:text-slate-900">Operational History</div>
+            <h1 className="text-6xl sm:text-7xl md:text-[108px] leading-[0.7] italic uppercase tracking-tighter text-black dark:text-white drop-shadow-none">The <br /><span className="text-white dark:text-accent underline decoration-8 text-[99px]">DegreeGate</span><br /> Narrative.</h1>
+            <p className="text-xl md:text-2xl italic font-black max-w-lg border-l-[12px] border-black dark:border-accent pl-10 text-black dark:text-slate-400 drop-shadow-none">We didn't start as a business. We started as students who realized the system was built to be broken, and then we mastered the cracks.</p>
           </div>
-          <div className="space-y-8 text-black/80 text-sm leading-relaxed font-black max-w-xl italic">
-             <p>Founded by graduates who navigated the complex academic landscape of Europe, DegreeGate was born out of one simple truth: <strong className="text-black italic drop-shadow-none">Traditional support is slow, expensive, and fundamentally out of touch with high-impact reality.</strong></p>
+          <div className="space-y-8 text-black/80 dark:text-slate-400 text-sm leading-relaxed font-black max-w-xl italic">
+             <p>Founded by graduates who navigated the complex academic landscape of Europe, DegreeGate was born out of one simple truth: <strong className="text-black dark:text-white italic drop-shadow-none">Traditional support is slow, expensive, and fundamentally out of touch with high-impact reality.</strong></p>
              <p>Our mentors aren't just academics. They are mercenaries of the corporate world who have scaled their own careers into global powerhouses like Amazon, Google, and beyond. We don't just teach modules; we deployment career assets.</p>
           </div>
-          <button className="geometric-button-primary px-16 py-7 italic shadow-2xl shadow-black/10 !rounded-[2rem] bg-black text-white border-black hover:bg-black/90">Audit Our Sector</button>
+          <button className="geometric-button-primary px-16 py-7 italic shadow-2xl shadow-black/10 !rounded-[2rem] bg-black dark:bg-white text-white dark:text-slate-900 border-black dark:border-white hover:bg-black/90 dark:hover:bg-slate-200">Audit Our Sector</button>
         </div>
         <motion.div 
           whileHover={{ perspective: 1000, rotateY: 10, rotateX: 5 }}
@@ -1579,15 +1536,15 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
   }
 
   return (
-  <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden">
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.05),transparent)]" />
+  <div className="bg-bg pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.05),transparent)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.02),transparent)]" />
     <div className="max-w-7xl mx-auto relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32">
         <div className="space-y-16">
           <div className="space-y-8">
-            <div className="geometric-badge bg-black text-white">Direct Channel</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[85px] text-black tracking-tighter leading-[0.8] italic uppercase underline decoration-white/30">Contact <br /><span className="text-white">Support.</span></h1>
-            <p className="text-xl text-black font-black italic underline decoration-white/20 leading-relaxed">Get in touch with us. We are here to help you with your academic and career queries.</p>
+            <div className="geometric-badge bg-slate-900 dark:bg-accent text-white">Direct Channel</div>
+            <h1 className="text-6xl sm:text-7xl md:text-[85px] text-slate-900 dark:text-white tracking-tighter leading-[0.8] italic uppercase underline decoration-slate-200 dark:decoration-white/10">Contact <br /><span className="text-accent dark:text-primary">Support.</span></h1>
+            <p className="text-xl text-slate-500 dark:text-slate-400 font-bold italic underline decoration-slate-100 dark:decoration-white/5 leading-relaxed">Get in touch with us. We are here to help you with your academic and career queries.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
@@ -1595,10 +1552,10 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
               { label: 'Priority Support', value: '24/7 Global Response', icon: <ShieldCheck /> },
               { label: 'Asset Support', value: <span className="text-base not-italic underline">help@degreegate.com</span>, icon: <GraduationCap /> },
             ].map((item, i) => (
-              <div key={i} className="space-y-4 group cursor-pointer text-black">
-                <div className="flex items-center gap-4 text-black">
-                  <div className="w-12 h-12 bg-black/5 border border-black/10 rounded-2xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all shadow-xl">{item.icon}</div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/50">{item.label}</span>
+              <div key={i} className="space-y-4 group cursor-pointer text-slate-900 dark:text-white">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 transition-all shadow-xl">{item.icon}</div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/40">{item.label}</span>
                 </div>
                 <div className="font-black text-xl lg:text-2xl italic tracking-tight uppercase">{item.value}</div>
               </div>
@@ -1689,12 +1646,12 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
 
 
 const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => (
-  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden">
+  <div className="bg-bg pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500">
     <div className="max-w-7xl mx-auto space-y-20 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
-        <div className="geometric-badge mx-auto bg-black text-white">Intelligence Pipeline</div>
-        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-900 tracking-tighter">Strategic <br /><span className="text-yellow-500 underline">Intel.</span></h1>
-        <p className="text-xl text-slate-500 font-bold italic border-x border-slate-200 px-10">Operational briefings, system updates, and academic extraction tactics.</p>
+        <div className="geometric-badge mx-auto bg-slate-900 dark:bg-accent text-white">Intelligence Pipeline</div>
+        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-900 dark:text-white tracking-tighter">Strategic <br /><span className="text-accent dark:text-primary underline">Intel.</span></h1>
+        <p className="text-xl text-slate-500 dark:text-slate-400 font-bold italic border-x border-slate-200 dark:border-white/10 px-10">Operational briefings, system updates, and academic extraction tactics.</p>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
@@ -1702,17 +1659,17 @@ const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, 
           <div 
             key={post.slug} 
             onClick={() => setPage('blog-post', post.slug)}
-            className="geometric-card bg-white border-slate-200 p-10 space-y-8 group hover:border-yellow-400 transition-all shadow-sm cursor-pointer"
+            className="geometric-card p-10 space-y-8 group cursor-pointer"
           >
-            <div className="aspect-video bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-100">
+            <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-2xl overflow-hidden relative border border-slate-100 dark:border-white/5">
                <img src={post.featured_image || 'https://picsum.photos/seed/degreegate/800/600'} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
             </div>
             <div className="space-y-4">
-              <div className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">{new Date(post.date).toLocaleDateString()}</div>
-              <h3 className="text-2xl font-black text-slate-900 italic uppercase leading-tight group-hover:text-yellow-600 transition-colors">{post.title}</h3>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed italic line-clamp-3">{post.description}</p>
+              <div className="text-[10px] font-black text-accent uppercase tracking-widest">{new Date(post.date).toLocaleDateString()}</div>
+              <h3 className="text-2xl font-black italic uppercase leading-tight group-hover:text-accent transition-colors">{post.title}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed italic line-clamp-3">{post.description}</p>
             </div>
-            <button className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors flex items-center gap-3">
+            <button className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/40 group-hover:text-slate-900 dark:group-hover:text-white transition-colors flex items-center gap-3">
               Decrypt Full Story <ArrowRight size={14} />
             </button>
           </div>
@@ -2167,6 +2124,107 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
   )
 }
 
+// --- Floating Controls Component ---
+
+const ControlHub = ({ 
+  currency, 
+  setCurrency, 
+  supportedCurrencies, 
+  theme, 
+  setTheme 
+}: { 
+  currency: string; 
+  setCurrency: (c: string) => void; 
+  supportedCurrencies: string[]; 
+  theme: 'light' | 'dark'; 
+  setTheme: (t: 'light' | 'dark') => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="fixed bottom-8 right-8 z-[1000] flex flex-col items-end">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
+            className="mb-6 p-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] min-w-[320px] ring-1 ring-black/5"
+          >
+            <div className="space-y-8">
+              {/* Theme Toggle */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <p className="text-[10px] font-black italic text-slate-400 dark:text-white/40 uppercase tracking-widest leading-none">Global Atmosphere</p>
+                  <div className={`w-2 h-2 rounded-full ${theme === 'dark' ? 'bg-indigo-500 animate-pulse' : 'bg-orange-400'}`} />
+                </div>
+                <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl">
+                  <button 
+                    onClick={() => setTheme('light')}
+                    className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-xl transition-all duration-500 ${
+                      theme === 'light' ? 'bg-white text-slate-900 shadow-xl' : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                  >
+                    <Sun size={16} className={theme === 'light' ? 'text-orange-500' : ''} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Day Mode</span>
+                  </button>
+                  <button 
+                    onClick={() => setTheme('dark')}
+                    className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-xl transition-all duration-500 ${
+                      theme === 'dark' ? 'bg-slate-800 text-white shadow-xl' : 'text-white/20 hover:text-white/40'
+                    }`}
+                  >
+                    <Moon size={16} className={theme === 'dark' ? 'text-indigo-400' : ''} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Night Ops</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Currency Selection */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-black italic text-slate-400 dark:text-white/40 uppercase tracking-widest pl-2">Pricing Protocol ({currency})</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {supportedCurrencies.map(c => (
+                    <button 
+                      key={c}
+                      onClick={() => { setCurrency(c); localStorage.setItem('dg-currency', c); }}
+                      className={`py-3 rounded-xl text-[10px] font-black italic uppercase transition-all duration-300 ${
+                        currency === c 
+                          ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20' 
+                          : 'bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-white/30 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-600 dark:hover:text-white'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.button 
+        whileHover={{ scale: 1.05, y: -4 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all duration-500 group relative ${
+          isOpen 
+            ? 'bg-yellow-400 text-black rotate-90' 
+            : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-100 dark:border-white/10'
+        }`}
+      >
+        <div className="absolute inset-0 rounded-[2rem] bg-yellow-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+        {isOpen ? <X size={28} /> : <Cpu size={28} className="group-hover:text-yellow-500 transition-colors" />}
+        
+        {!isOpen && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white dark:border-slate-900 animate-bounce" />
+        )}
+      </motion.button>
+    </div>
+  );
+};
+
 // --- Main App ---
 
 export default function App() {
@@ -2175,6 +2233,28 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
   const [activePostSlug, setActivePostSlug] = useState<string | null>(null);
+
+  // Theme Logic
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('dg-theme') as 'light' | 'dark';
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+       // Optional: auto detect browser preference but user wanted manual section
+       // setTheme('dark'); 
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('dg-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   // Currency Logic
   const [currency, setCurrency] = useState('EUR');
@@ -2291,9 +2371,6 @@ export default function App() {
       <Navbar 
         activePage={currentPage} 
         setPage={setView} 
-        currency={currency} 
-        setCurrency={setCurrency} 
-        supportedCurrencies={supportedCurrencies} 
       />
       
       <main className="flex-1">
@@ -2309,6 +2386,14 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <ControlHub 
+        currency={currency}
+        setCurrency={setCurrency}
+        supportedCurrencies={supportedCurrencies}
+        theme={theme}
+        setTheme={setTheme}
+      />
 
       <footer className="bg-slate-50 text-slate-900 py-24 px-6 md:px-10 mt-32 border-t-[10px] border-yellow-400 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/5 rounded-full blur-[120px] -mr-64 -mt-64" />
@@ -2368,8 +2453,8 @@ export default function App() {
             </div>
           </div>
           
-          <div className="pt-10 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+          <div className="pt-10 border-t border-slate-200 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest italic">
               © 2026 DegreeGate Intelligence Network. All Rights Reserved.
             </div>
             <div className="flex gap-8">
@@ -2379,7 +2464,7 @@ export default function App() {
                 { icon: <Instagram size={22} />, title: "Instagram", href: "https://www.instagram.com/degreegate" },
                 { icon: <Linkedin size={22} />, title: "LinkedIn", href: "https://pl.linkedin.com/company/degreegates" }
               ].map((social, i) => (
-                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-yellow-500 transition-all hover:scale-110" title={social.title}>{social.icon}</a>
+                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-slate-300 dark:text-white/40 hover:text-yellow-500 transition-all hover:scale-110" title={social.title}>{social.icon}</a>
               ))}
             </div>
           </div>
