@@ -316,10 +316,23 @@ const Sticker = ({ text, className = "" }: { text: string; className?: string })
   </div>
 );
 
-const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: PageId, id?: string) => void }) => {
+const Navbar = ({ 
+  activePage, 
+  setPage, 
+  currency, 
+  setCurrency, 
+  supportedCurrencies 
+}: { 
+  activePage: PageId, 
+  setPage: (p: PageId, id?: string) => void, 
+  currency: string, 
+  setCurrency: (c: string) => void, 
+  supportedCurrencies: string[] 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [shieldsOpen, setShieldsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -371,7 +384,7 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
         </div>
 
         {/* Desktop Menu */}
-        <nav className="hidden lg:flex items-center gap-10 ml-32">
+        <nav className="hidden lg:flex items-center gap-10">
           <button onClick={() => setPage('home')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'home' ? 'after:w-full' : ''}`}>Base</button>
           
           <div className="relative group/dropdown">
@@ -430,6 +443,37 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
           <button onClick={() => setPage('blog')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'blog' ? 'after:w-full' : ''}`}>Blog</button>
           <button onClick={() => setPage('about')} className={`geometric-nav-link !text-white drop-shadow-md ${activePage === 'about' ? 'after:w-full' : ''}`}>About</button>
           
+          <div className="relative group/currency">
+            <button 
+              onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}
+              className="geometric-nav-link flex items-center gap-2 !text-white drop-shadow-md"
+            >
+              {currency} <ChevronDown size={12} className={`transition-transform ${currencyMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <AnimatePresence>
+              {currencyMenuOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                  className="absolute top-full right-0 mt-4 bg-black/90 backdrop-blur-xl border border-white/10 p-4 rounded-3xl shadow-2xl z-[150] grid grid-cols-2 gap-2 min-w-[200px]"
+                >
+                  {supportedCurrencies.map(c => (
+                    <button 
+                      key={c}
+                      onClick={() => { setCurrency(c); setCurrencyMenuOpen(false); localStorage.setItem('dg-currency', c); }}
+                      className={`px-4 py-2 rounded-xl text-xs font-black italic uppercase transition-all ${
+                        currency === c ? 'bg-yellow-400 text-black' : 'text-white/60 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <button 
             onClick={() => setPage('contact')}
             className="geometric-button-primary !py-4 !px-8 text-xs !rounded-full bg-white !text-primary border-none shadow-xl hover:bg-accent-light hover:!text-primary transition-all"
@@ -537,6 +581,20 @@ const Navbar = ({ activePage, setPage }: { activePage: PageId, setPage: (p: Page
                 Intelligence Blog
               </motion.button>
 
+              <div className="grid grid-cols-5 gap-2 mt-8 px-4">
+                {supportedCurrencies.map(c => (
+                  <button 
+                    key={c}
+                    onClick={() => { setCurrency(c); localStorage.setItem('dg-currency', c); }}
+                    className={`py-3 rounded-xl text-[10px] font-black italic uppercase transition-all ${
+                      currency === c ? 'bg-yellow-400 text-black' : 'bg-slate-50 text-slate-400'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+
               <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -570,7 +628,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
             playsInline
             className="w-full h-full object-cover"
           >
-            <source src="https://degreegate.com/wp-content/uploads/2026/04/makn.mp4" type="video/mp4" />
+            <source src="https://degreegate.pl/wp-content/uploads/2026/04/makn.mp4" type="video/mp4" />
           </video>
           {/* Bottom Gradient Fade Overlay */}
           <div className="absolute inset-0 z-[1] pointer-events-none bg-[linear-gradient(to_bottom,transparent_60%,rgba(0,0,0,0.7)_100%)]" />
@@ -629,7 +687,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
                 id: 'thesis-shield', 
                 title: 'Thesis Shield', 
                 price: formatPrice(131.5),
-                video: 'https://degreegate.com/wp-content/uploads/2026/04/mmkcard.mov',
+                video: 'https://degreegate.pl/wp-content/uploads/2026/04/mmkcard.mov',
                 desc: 'Total milestone security for your final dissertation.',
                 img: 'https://picsum.photos/seed/thesis-tactical/800/600',
                 feats: ['Logic Audit', 'Source Scrape', 'Defense Drill']
@@ -638,7 +696,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
                 id: 'internship-shield', 
                 title: 'Internship Shield', 
                 price: formatPrice(105), 
-                video: 'https://degreegate.com/wp-content/uploads/2026/04/caed-2.mp4',
+                video: 'https://degreegate.pl/wp-content/uploads/2026/04/caed-2.mp4',
                 desc: 'Aggressive professional pipeline for global careers.',
                 img: 'https://picsum.photos/seed/career-tactical/800/600',
                 feats: ['CV Weaponization', 'Interview Ops', 'LinkedIn Audit']
@@ -707,7 +765,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
           <div className="relative group">
              <div className="absolute -inset-4 bg-black/10 rounded-[4rem] rotate-3 blur-2xl group-hover:rotate-6 transition-transform" />
              <img 
-               src="https://degreegate.com/wp-content/uploads/2026/04/img_4502.jpg" 
+               src="https://degreegate.pl/wp-content/uploads/2026/04/img_4502.jpg" 
                className="relative rounded-[3rem] w-full aspect-[4/5] object-cover bg-black shadow-2xl border-[10px] border-black"
                referrerPolicy="no-referrer"
                alt="Expert Advice"
@@ -755,7 +813,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
             playsInline
             className="w-full h-full object-cover opacity-90"
           >
-            <source src="https://degreegate.com/wp-content/uploads/2026/04/5.mp4" type="video/mp4" />
+            <source src="https://degreegate.pl/wp-content/uploads/2026/04/5.mp4" type="video/mp4" />
           </video>
           
           {/* Tactical Edge-Only Premium Vignette */}
@@ -846,7 +904,7 @@ const ThesisShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => vo
           <div className="absolute -inset-4 bg-accent/10 rounded-[4rem] lg:rounded-[5rem] blur-2xl" />
           <div className="relative geometric-card overflow-hidden bg-accent-light border-none shadow-xl aspect-[4/5] rounded-[4rem] lg:rounded-[5rem]">
             <ShieldVideoBackground 
-              src="https://degreegate.com/wp-content/uploads/2026/04/mmkcard.mov" 
+              src="https://degreegate.pl/wp-content/uploads/2026/04/mmkcard.mov" 
               innerClassName="group-hover:scale-110 transition-transform duration-[2000ms]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent flex flex-col justify-end p-10 lg:p-16">
@@ -892,7 +950,7 @@ const InternshipShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) =
           <div className="absolute -inset-8 bg-black/5 rounded-[4rem] lg:rounded-[6rem] -rotate-3" />
           <div className="relative geometric-card border-none shadow-3xl rounded-[4rem] lg:rounded-[6rem] overflow-hidden aspect-[4/5] p-2 !bg-black/80 backdrop-blur-md">
             <ShieldVideoBackground 
-              src="https://degreegate.com/wp-content/uploads/2026/04/caed-2.mp4" 
+              src="https://degreegate.pl/wp-content/uploads/2026/04/caed-2.mp4" 
               innerClassName="rounded-[3.5rem] lg:rounded-[5.5rem]"
             />
             <div className="absolute top-12 right-12 bg-black text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-xl">Pipeline Active</div>
@@ -1100,7 +1158,7 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
           className="relative rounded-[3rem] lg:rounded-[4rem] overflow-hidden border-4 border-white/5 shadow-3xl aspect-[21/9] group bg-black"
         >
           <video 
-            src="https://degreegate.com/wp-content/uploads/2026/04/ggg.mp4" 
+            src="https://degreegate.pl/wp-content/uploads/2026/04/ggg.mp4" 
             autoPlay 
             muted 
             loop 
@@ -1140,7 +1198,7 @@ const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string 
         >
           <div className="relative aspect-[3/4] overflow-hidden bg-black">
             <video 
-              src="https://degreegate.com/wp-content/uploads/2026/04/kkk.mp4" 
+              src="https://degreegate.pl/wp-content/uploads/2026/04/kkk.mp4" 
               autoPlay 
               muted 
               loop 
@@ -1169,7 +1227,7 @@ const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string 
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent opacity-5 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="relative aspect-[3/4] overflow-hidden bg-black">
             <video 
-              src="https://degreegate.com/wp-content/uploads/2026/04/ggg.mp4" 
+              src="https://degreegate.pl/wp-content/uploads/2026/04/ggg.mp4" 
               autoPlay 
               muted 
               loop 
@@ -2126,25 +2184,37 @@ export default function App() {
   useEffect(() => {
     const fetchCurrencyData = async () => {
       try {
-        // 1. Detect currency by IP
-        const ipResponse = await fetch('https://ipapi.co/json/');
-        const ipData = await ipResponse.json();
-        const detectedCurrency = ipData.currency?.toUpperCase();
-        
-        if (detectedCurrency && supportedCurrencies.includes(detectedCurrency)) {
-          setCurrency(detectedCurrency);
+        // Check for manual override first
+        const savedCurrency = localStorage.getItem('dg-currency');
+        if (savedCurrency && supportedCurrencies.includes(savedCurrency)) {
+          setCurrency(savedCurrency);
         } else {
-          setCurrency('EUR');
+          // 1. Detect currency by IP
+          const ipResponse = await fetch('https://ipapi.co/json/').catch(() => null);
+          let detectedCurrency = 'EUR';
+          
+          if (ipResponse && ipResponse.ok) {
+            const ipData = await ipResponse.json();
+            detectedCurrency = ipData.currency?.toUpperCase() || 'EUR';
+          }
+          
+          if (detectedCurrency && supportedCurrencies.includes(detectedCurrency)) {
+            setCurrency(detectedCurrency);
+          } else {
+            setCurrency('EUR');
+          }
         }
 
         // 2. Fetch exchange rates (from EUR base)
-        const ratesResponse = await fetch('https://open.er-api.com/v6/latest/EUR');
-        const ratesData = await ratesResponse.json();
-        if (ratesData && ratesData.rates) {
-          setRates(ratesData.rates);
+        const ratesResponse = await fetch('https://open.er-api.com/v6/latest/EUR').catch(() => null);
+        if (ratesResponse && ratesResponse.ok) {
+          const ratesData = await ratesResponse.json();
+          if (ratesData && ratesData.rates) {
+            setRates({ ...ratesData.rates, EUR: 1 });
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch currency/rates:', error);
+        console.warn('Currency detection failed, falling back to EUR:', error);
       }
     };
     fetchCurrencyData();
@@ -2218,7 +2288,13 @@ export default function App() {
       </AnimatePresence>
 
       <div className="geometric-container">
-      <Navbar activePage={currentPage} setPage={setView} />
+      <Navbar 
+        activePage={currentPage} 
+        setPage={setView} 
+        currency={currency} 
+        setCurrency={setCurrency} 
+        supportedCurrencies={supportedCurrencies} 
+      />
       
       <main className="flex-1">
         <AnimatePresence mode="wait">
