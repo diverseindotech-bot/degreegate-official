@@ -104,6 +104,13 @@ const SUBJECTS: Subject[] = [
   { id: 'ir', name: 'International Relations', description: 'Geopolitics, diplomacy, and global governance frameworks.' },
 ];
 
+const socials = [
+  { id: "facebook", href: "https://www.facebook.com/degreegates?rdid=mbDxmXpoAwgbSkMB&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1863a7eXUv%2F#" },
+  { id: "x", href: "https://x.com/degreegates?s=21" },
+  { id: "instagram", href: "https://www.instagram.com/degreegate" },
+  { id: "linkedin", href: "https://pl.linkedin.com/company/degreegates" }
+];
+
 const STICKERS = ["SYSTEMS", "CLARITY", "CONSISTENCY", "PROTECTION"];
 
 // --- Components ---
@@ -190,7 +197,7 @@ const TacticalLoader: React.FC<{ onComplete: () => void }> = ({ onComplete }) =>
 };
 
 const ProblemSection = () => (
-  <section className="py-32 px-6 lg:px-20 relative overflow-hidden bg-yellow-400 dark:bg-slate-950 border-y border-black/5 dark:border-white/5 transition-colors duration-500">
+  <section className="py-32 px-6 lg:px-20 relative overflow-hidden bg-yellow-400 border-y border-black/5 transition-colors duration-500 section-fade-both">
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
@@ -198,9 +205,11 @@ const ProblemSection = () => (
         viewport={{ once: true }}
         className="text-center"
       >
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase leading-tight max-w-4xl mx-auto text-black dark:text-white flex items-center justify-center gap-6">
-          <Zap className="text-black dark:text-accent fill-current hidden md:block" size={48} />
-          “European universities weren’t built with you in mind.”
+        <h2 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black italic uppercase leading-[1.1] max-w-4xl mx-auto text-black flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          <Zap className="text-black fill-current hidden md:block" size={48} />
+          <span className="inline-block text-center px-4">
+            “European universities <span className="text-blue-700">weren’t built</span> with you in mind.”
+          </span>
         </h2>
       </motion.div>
 
@@ -216,7 +225,7 @@ const ProblemSection = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.2 }}
-            className="geometric-card !bg-black/90 dark:!bg-white/5 backdrop-blur-md p-10 space-y-6 hover:scale-105 transition-transform"
+            className="geometric-card !bg-black/90 backdrop-blur-md p-10 space-y-6 hover:scale-105 transition-transform border-none shadow-2xl"
           >
             <div className="text-accent text-5xl font-black italic opacity-40">{i + 1}</div>
             <p className="text-lg md:text-xl font-medium italic leading-relaxed text-white">
@@ -232,7 +241,7 @@ const ProblemSection = () => (
         viewport={{ once: true }}
         className="text-center"
       >
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase text-white dark:text-accent drop-shadow-2xl">
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase text-white drop-shadow-2xl">
           “DegreeGate was.”
         </h2>
       </motion.div>
@@ -272,35 +281,94 @@ const ProductCardAnimationWrapper: React.FC<{ children?: ReactNode, index: numbe
   );
 };
 
-const ShieldVideoBackground = ({ src, className = "", innerClassName = "" }: { src: string; className?: string; innerClassName?: string }) => {
+const ShieldVideoBackground = ({ 
+  src, 
+  className = "", 
+  innerClassName = "", 
+  thumbnail 
+}: { 
+  src: string; 
+  className?: string; 
+  innerClassName?: string;
+  thumbnail?: string;
+}) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (!isLoaded) {
+      interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 98) return prev;
+          const increment = (100 - prev) * 0.05;
+          return prev + increment;
+        });
+      }, 150);
+    } else {
+      setProgress(100);
+    }
+    return () => clearInterval(interval);
+  }, [isLoaded]);
 
   return (
     <div className={`absolute inset-0 z-0 overflow-hidden ${className}`}>
-      {/* Placeholder / Subtle Loading Animation */}
+      {/* Tactical Loading Overlay */}
       <AnimatePresence>
         {!isLoaded && (
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0 bg-primary/20 backdrop-blur-xl flex items-center justify-center z-10"
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="absolute inset-0 bg-black flex flex-col items-center justify-center z-10"
           >
-             <motion.div 
-               animate={{ rotate: 360 }}
-               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-               className="w-12 h-12"
-             >
-               <Loader2 className="w-full h-full text-accent animate-pulse" />
-             </motion.div>
+             {thumbnail && (
+               <motion.img 
+                 initial={{ opacity: 0, scale: 1.1 }}
+                 animate={{ opacity: 0.3, scale: 1 }}
+                 src={thumbnail} 
+                 className="absolute inset-0 w-full h-full object-cover blur-sm" 
+                 alt="" 
+                 referrerPolicy="no-referrer"
+               />
+             )}
+             
+             {/* Scanlines/Grid Effect */}
+             <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.1)_50%,transparent_50%)] bg-[length:100%_4px] pointer-events-none opacity-20" />
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] opacity-80" />
+             
+             <div className="relative z-20 w-full max-w-[280px] space-y-8 px-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <p className="text-[11px] font-black text-accent uppercase tracking-[0.4em] animate-pulse">Initializing Sector</p>
+                    <p className="text-3xl font-black italic text-white leading-none">{Math.floor(progress)}%</p>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/10 relative">
+                    <motion.div 
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.5 }}
+                      className="h-full bg-accent shadow-[0_0_20px_rgba(14,165,233,0.6)]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-[9px] font-bold text-white/30 uppercase tracking-[0.2em]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-1 bg-accent rounded-full animate-ping" />
+                    <span>Signal: Strong</span>
+                  </div>
+                  <span>DegreeGate v2.4</span>
+                </div>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <motion.video
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoaded ? 1 : 0 }}
-        transition={{ duration: 1.5 }}
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: isLoaded ? 1 : 0, scale: isLoaded ? 1 : 1.05 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
         autoPlay
         loop
         muted
@@ -351,7 +419,7 @@ const Navbar = ({
   // Text color logic: Dynamic based on theme or context
   const navTextColor = scrolled ? "text-slate-900 dark:text-white" : "text-white";
   const navBgColor = isOpen 
-    ? 'bg-white dark:bg-slate-900' 
+    ? 'bg-white dark:bg-black' 
     : scrolled 
       ? 'backdrop-blur-xl bg-white/80 dark:bg-black/80' 
       : 'backdrop-blur-sm bg-black/20';
@@ -368,14 +436,14 @@ const Navbar = ({
           className="flex items-center gap-4 cursor-pointer group flex-shrink-0"
           onClick={() => { setPage('home'); setIsOpen(false); }}
         >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-400 rounded-2xl rotate-12 flex items-center justify-center shadow-xl shadow-yellow-400/20 group-hover:rotate-0 transition-transform duration-500">
+          <div className="w-[47px] h-[44px] bg-yellow-400 rounded-2xl rotate-12 flex items-center justify-center shadow-xl shadow-yellow-400/20 group-hover:rotate-0 transition-transform duration-500">
             <div className="relative">
               <GraduationCap size={24} className="text-black" />
               <Zap size={14} className="text-black absolute -top-2 -right-2 fill-black" />
             </div>
           </div>
           <div className="flex flex-col">
-            <div className={`font-display text-[22px] sm:text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${isOpen ? 'text-slate-900 dark:text-white' : navTextColor}`}>
+            <div className={`font-display text-[22px] sm:text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${isOpen ? 'text-black dark:text-white' : navTextColor}`}>
               DegreeGate<span className="text-yellow-400">.</span>
             </div>
             <div className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-1 ${isOpen ? 'text-slate-400 dark:text-slate-500' : scrolled ? 'text-slate-400' : 'text-white/50'}`}>Intelligence Gate</div>
@@ -386,11 +454,12 @@ const Navbar = ({
         <nav className="hidden lg:flex items-center gap-6 xl:gap-10 ml-12 xl:ml-20">
           <button onClick={() => setPage('home')} className={`geometric-nav-link ${activePage === 'home' ? 'after:w-full' : ''} ${navTextColor}`}>Base</button>
           
-          <div className="relative group/dropdown">
+          <div className="relative group/dropdown"
+            onMouseEnter={() => setShieldsOpen(true)}
+            onMouseLeave={() => setShieldsOpen(false)}
+          >
             <button 
               className={`geometric-nav-link flex items-center gap-2 ${activePage.includes('shield') ? 'after:w-full' : ''} ${navTextColor}`}
-              onMouseEnter={() => setShieldsOpen(true)}
-              onMouseLeave={() => setShieldsOpen(false)}
             >
               The Shields <ChevronDown size={14} className={`transition-transform duration-300 ${shieldsOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -398,12 +467,14 @@ const Navbar = ({
             <AnimatePresence>
               {shieldsOpen && (
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  className="absolute top-full left-0 bg-white dark:bg-slate-900 p-4 min-w-[280px] shadow-2xl rounded-[2.5rem] z-[120] mt-4 border border-slate-100 dark:border-white/10 backdrop-blur-xl"
+                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                  transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                  className="absolute top-full left-0 pt-4 min-w-[320px] z-[120]"
                 >
-                  <div className="space-y-2">
+                  <div className="bg-white dark:bg-black p-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] rounded-[2.5rem] border border-slate-100 dark:border-white/10 backdrop-blur-2xl">
+                    <div className="space-y-2">
                     <button 
                       onClick={() => { setPage('thesis-shield'); setShieldsOpen(false); }} 
                       className="w-full text-left p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all flex items-center gap-4 group/item"
@@ -429,7 +500,8 @@ const Navbar = ({
                       </div>
                     </button>
                   </div>
-                </motion.div>
+                </div>
+              </motion.div>
               )}
             </AnimatePresence>
           </div>
@@ -445,7 +517,7 @@ const Navbar = ({
         <div className="flex items-center gap-6 ml-auto">
           <button 
             onClick={() => setPage('contact')}
-            className="hidden lg:block geometric-button-primary !py-4 !px-8 text-xs !rounded-full bg-slate-900 dark:bg-white !text-white dark:!text-slate-900 border-none shadow-xl hover:bg-accent dark:hover:bg-accent-light hover:!text-white transition-all whitespace-nowrap"
+            className="hidden lg:block geometric-button-primary !py-4 !px-8 text-xs !rounded-full bg-black dark:bg-white !text-white dark:!text-slate-900 border-none shadow-xl hover:bg-accent dark:hover:bg-accent-light hover:!text-white transition-all whitespace-nowrap"
           >
             Contact Hub
           </button>
@@ -499,11 +571,11 @@ const Navbar = ({
               >
                 <span className="text-[10px] text-slate-400 uppercase tracking-widest block font-black mb-6 opacity-60">Strategic Shields</span>
                 <div className="grid grid-cols-1 gap-4 px-4">
-                  <button onClick={() => { setPage('thesis-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
+                  <button onClick={() => { setPage('thesis-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
                     <GraduationCap size={20} className="text-yellow-600 group-hover:text-black" /> 
                     Thesis Shield
                   </button>
-                  <button onClick={() => { setPage('internship-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
+                  <button onClick={() => { setPage('internship-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
                     <Briefcase size={20} className="text-yellow-600 group-hover:text-black" /> 
                     Internship Shield
                   </button>
@@ -555,7 +627,7 @@ const Navbar = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
                 onClick={() => { setPage('contact'); setIsOpen(false); }} 
-                className="geometric-button-primary w-full mt-10 !py-8 text-center !rounded-full bg-slate-900 !text-white border-none shadow-2xl italic uppercase text-xl font-black hover:bg-yellow-400 hover:!text-black transition-all"
+                className="geometric-button-primary w-full mt-10 !py-8 text-center !rounded-full bg-black !text-white border-none shadow-2xl italic uppercase text-xl font-black hover:bg-yellow-400 hover:!text-black transition-all"
               >
                 Open Channel
               </motion.button>
@@ -573,7 +645,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
   return (
     <div className="flex flex-col bg-transparent w-full overflow-x-hidden pt-0">
       {/* Section 0: Hero Section - The "Creators" Layout */}
-      <section className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-6 lg:px-20 overflow-hidden pt-[140px] pb-32">
+      <section className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-6 lg:px-20 overflow-hidden pt-[140px] pb-32 section-fade-bottom">
         {/* Video Background */}
         <div className="absolute inset-0 z-0">
           <video
@@ -598,7 +670,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
           <div className="space-y-8">
             <h1 className="text-5xl sm:text-6xl md:text-8xl font-display font-black leading-tight text-white tracking-tight drop-shadow-2xl">
               WE PROTECT <br />
-              <span className="animate-rainbow-glow underline underline-offset-8 decoration-white/20">CAREERS</span>, <br />
+              <span className="text-white underline underline-offset-8 decoration-white/20">CAREERS</span>, <br />
               NOT JUST <span className="text-white border-b-8 border-yellow-400">DEGREES</span>
             </h1>
             
@@ -622,16 +694,16 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
       <ProblemSection />
 
       {/* Section 2: Product Suite (Previously Section 1, reordered to appear after Problem Section) */}
-      <section className="bg-purple-100 dark:bg-slate-900 text-slate-900 dark:text-white py-32 px-6 lg:px-20 overflow-hidden relative border-b border-slate-200 dark:border-white/5 transition-colors duration-500">
+      <section className="bg-purple-600 text-slate-900 py-32 px-6 lg:px-20 overflow-hidden relative border-b border-black/5 transition-colors duration-500 section-fade-both">
         <div className="absolute inset-0 opacity-20 dark:opacity-5 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         
         <div className="max-w-7xl mx-auto w-full space-y-20 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end gap-12 border-b border-black/10 dark:border-white/10 pb-16">
             <div className="space-y-6">
               <div className="geometric-badge bg-black dark:bg-accent text-white">Operational Units</div>
-              <h2 className="text-6xl sm:text-7xl md:text-8xl font-black leading-none text-slate-900 dark:text-white italic">Elite <br /> <span className="text-accent dark:text-primary underline">Shields</span></h2>
+              <h2 className="text-6xl sm:text-7xl md:text-8xl font-black leading-none text-slate-900 dark:text-white italic">Elite <br /> <span className="text-[#ededed] underline">Shields</span></h2>
             </div>
-            <p className="max-w-md text-slate-600 dark:text-slate-400 font-bold text-lg italic border-l-4 border-slate-900 dark:border-accent pl-6 py-2">
+            <p className="max-w-md text-white font-bold text-lg italic border-l-4 border-white pl-6 py-2">
               Subscription-based bodyguards for your academic and career milestones. Zero failure tolerance.
             </p>
           </div>
@@ -664,7 +736,10 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
                 >
                   {s.video && (
                     <>
-                      <ShieldVideoBackground src={s.video} />
+                      <ShieldVideoBackground 
+                        src={s.video} 
+                        thumbnail={s.img}
+                      />
                       {/* Sub-scrolling cinematic gradient shimmer */}
                       <div className="absolute inset-0 z-[1] bg-gradient-to-tr from-accent/20 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                     </>
@@ -715,7 +790,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
       </section>
 
       {/* Section 4 (Now 6): Expert Intel Callout */}
-      <section className="py-20 bg-yellow-400 px-6 lg:px-20 border-b border-black/5">
+      <section className="py-20 bg-yellow-400 px-6 lg:px-20 border-b border-black/5 section-fade-both">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
           <div className="relative group">
              <div className="absolute -inset-4 bg-black/10 rounded-[4rem] rotate-3 blur-2xl group-hover:rotate-6 transition-transform" />
@@ -741,7 +816,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
       </section>
 
       {/* Section 3 (Now 5): Intelligence Stats */}
-      <section className="pt-[55px] pb-16 bg-purple-300 text-black overflow-hidden relative border-b border-black/5">
+      <section className="pt-[55px] pb-16 bg-purple-600 text-black overflow-hidden relative border-b border-black/5">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
           {[
             { l: 'System Status', v: 'ACTIVE', s: 'text-[52px]' },
@@ -758,23 +833,17 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
       </section>
 
       {/* Section 3: Strategy Hub / Ladder */}
-      <section className="py-24 px-6 lg:px-20 relative overflow-hidden border-b border-white/5 min-h-[750px] flex items-center">
+      <section className="py-24 px-6 lg:px-20 relative overflow-hidden border-b border-white/5 min-h-[750px] flex items-center section-fade-top">
         {/* Full Section Background Video */}
-        <div className="absolute inset-0 z-0 overflow-hidden bg-black">
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            className="w-full h-full object-cover opacity-90"
-          >
-            <source src="https://degreegate.pl/wp-content/uploads/2026/04/5.mp4" type="video/mp4" />
-          </video>
+        <ShieldVideoBackground 
+          src="https://degreegate.pl/wp-content/uploads/2026/04/5.mp4" 
+          thumbnail="https://picsum.photos/seed/strategy-ladder/1920/1080"
+          className="opacity-90"
+        />
           
           {/* Tactical Edge-Only Premium Vignette */}
           <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,black,transparent_15%,transparent_85%,black)]" />
           <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,black,transparent_15%,transparent_85%,black)]" />
-        </div>
         
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/[0.03] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none z-[1]">
           Ladder
@@ -822,24 +891,24 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
 };
 
 const ThesisShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => void, formatPrice: (b: number) => string }) => (
-  <div className="bg-purple-300">
+  <div className="bg-purple-600 transition-colors duration-500">
     <section className="min-h-[65vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-black/5 z-0 h-[65vh] lg:h-[60vh] rounded-b-[4rem] lg:rounded-b-[10rem] shadow-sm backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/5 dark:bg-white/5 z-0 h-[65vh] lg:h-[60vh] rounded-b-[4rem] lg:rounded-b-[10rem] shadow-sm backdrop-blur-sm" />
       <div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-2 gap-20 items-center">
         <div className="space-y-10">
-          <div className="geometric-badge bg-black !text-white">Protocol ID: ACAD-TH-01</div>
-          <h1 className="text-6xl sm:text-7xl md:text-9xl text-black leading-[0.8] tracking-tighter italic uppercase drop-shadow-none">Thesis <br /><span className="text-white underline underline-offset-[12px]">Shield.</span></h1>
-          <p className="text-xl text-black font-black max-w-lg italic underline decoration-white/30 drop-shadow-none">
+          <div className="geometric-badge bg-black dark:bg-white text-white dark:text-slate-900">Protocol ID: ACAD-TH-01</div>
+          <h1 className="text-6xl sm:text-7xl md:text-9xl text-slate-950 dark:text-white leading-[0.8] tracking-tighter italic uppercase drop-shadow-none">Thesis <br /><span className="text-slate-900 dark:text-accent underline underline-offset-[12px]">Shield.</span></h1>
+          <p className="text-xl text-slate-950 dark:text-slate-300 font-black max-w-lg italic underline decoration-slate-900/10 dark:decoration-white/30 drop-shadow-none">
             3-Month Strategic Academic Architecture. We don't write it for you; we audit the logic, scrub the sources, and prepare your defense.
           </p>
           <div className="grid grid-cols-2 gap-8 lg:gap-12 pt-4">
             <div className="space-y-2">
-              <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Access Fee</div>
-              <div className="text-5xl lg:text-6xl font-black text-black italic leading-none">{formatPrice(131.5)}</div>
+              <div className="text-[10px] font-black text-slate-950/50 dark:text-white/50 uppercase tracking-widest">Access Fee</div>
+              <div className="text-5xl lg:text-6xl font-black text-slate-950 dark:text-white italic leading-none">{formatPrice(131.5)}</div>
             </div>
-            <div className="space-y-2 border-l border-black/10 pl-8 lg:pl-12">
-              <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Success Rate</div>
-              <div className="text-5xl font-black text-black italic leading-none">100%</div>
+            <div className="space-y-2 border-l border-slate-950/10 dark:border-white/10 pl-8 lg:pl-12">
+              <div className="text-[10px] font-black text-slate-950/50 dark:text-white/50 uppercase tracking-widest">Success Rate</div>
+              <div className="text-5xl font-black text-slate-950 dark:text-white italic leading-none">100%</div>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-6 pt-6">
@@ -860,6 +929,7 @@ const ThesisShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => vo
           <div className="relative geometric-card overflow-hidden bg-accent-light border-none shadow-xl aspect-[4/5] rounded-[4rem] lg:rounded-[5rem]">
             <ShieldVideoBackground 
               src="https://degreegate.pl/wp-content/uploads/2026/04/mmkcard.mov" 
+              thumbnail="https://picsum.photos/seed/thesis-tactical/800/600"
               innerClassName="group-hover:scale-110 transition-transform duration-[2000ms]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent flex flex-col justify-end p-10 lg:p-16">
@@ -894,38 +964,39 @@ const ThesisShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => vo
 );
 
 const InternshipShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) => void, formatPrice: (b: number) => string }) => (
-  <div className="bg-yellow-400">
-    <section className="min-h-[70vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[80vw] lg:w-[50vw] h-full bg-black/5 -skew-x-12 z-0 backdrop-blur-sm shadow-2xl" />
+  <div className="bg-yellow-400 transition-colors duration-500">
+    <section className="min-h-[70vh] flex items-center justify-center px-6 lg:px-20 pt-[160px] pb-24 relative overflow-hidden text-slate-950 dark:text-white">
+      <div className="absolute top-0 right-0 w-[80vw] lg:w-[50vw] h-full bg-black/5 dark:bg-white/5 -skew-x-12 z-0 backdrop-blur-sm shadow-2xl" />
       <div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-2 gap-20 items-center">
         <motion.div 
           whileHover={{ perspective: 1000, rotateY: -10, rotateX: -5 }}
           className="relative order-2 lg:order-1"
         >
-          <div className="absolute -inset-8 bg-black/5 rounded-[4rem] lg:rounded-[6rem] -rotate-3" />
-          <div className="relative geometric-card border-none shadow-3xl rounded-[4rem] lg:rounded-[6rem] overflow-hidden aspect-[4/5] p-2 !bg-black/80 backdrop-blur-md">
+          <div className="absolute -inset-8 bg-black/5 dark:bg-white/5 rounded-[4rem] lg:rounded-[6rem] -rotate-3" />
+          <div className="relative geometric-card border-none shadow-3xl rounded-[4rem] lg:rounded-[6rem] overflow-hidden aspect-[4/5] p-2 !bg-black/80 dark:!bg-black backdrop-blur-md">
             <ShieldVideoBackground 
               src="https://degreegate.pl/wp-content/uploads/2026/04/caed-2.mp4" 
+              thumbnail="https://picsum.photos/seed/career-tactical/800/600"
               innerClassName="rounded-[3.5rem] lg:rounded-[5.5rem]"
             />
-            <div className="absolute top-12 right-12 bg-black text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-xl">Pipeline Active</div>
+            <div className="absolute top-12 right-12 bg-black dark:bg-white text-white dark:text-slate-900 px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-xl">Pipeline Active</div>
           </div>
         </motion.div>
         <div className="space-y-12 order-1 lg:order-2 py-10 lg:py-0">
           <div className="space-y-6">
-            <div className="geometric-badge bg-black text-white">Sector: Corporate Logistics</div>
-            <h1 className="text-6xl sm:text-7xl md:text-9xl tracking-tighter leading-[0.8] italic uppercase text-black drop-shadow-none">Internship <br /><span className="text-white underline">Shield.</span></h1>
-            <p className="text-xl text-black font-black max-w-lg leading-relaxed italic underline decoration-white/30 drop-shadow-none">3-Month Professional Weaponization. We bridge the gap between your degree and the global boardroom.</p>
+            <div className="geometric-badge bg-black dark:bg-white text-white dark:text-slate-900">Sector: Corporate Logistics</div>
+            <h1 className="text-6xl sm:text-7xl md:text-9xl tracking-tighter leading-[0.8] italic uppercase text-slate-950 dark:text-white drop-shadow-none">Internship <br /><span className="text-slate-900 dark:text-accent underline">Shield.</span></h1>
+            <p className="text-xl text-slate-950 dark:text-slate-300 font-black max-w-lg leading-relaxed italic underline decoration-slate-950/10 dark:decoration-white/30 drop-shadow-none">3-Month Professional Weaponization. We bridge the gap between your degree and the global boardroom.</p>
           </div>
           
           <div className="grid grid-cols-2 gap-8 lg:gap-12">
             <div className="space-y-2">
-              <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Entry Fee</div>
-              <div className="text-5xl lg:text-6xl font-black text-black italic leading-none">{formatPrice(105)}</div>
+              <div className="text-[10px] font-black text-slate-950/50 dark:text-white/50 uppercase tracking-widest">Entry Fee</div>
+              <div className="text-5xl lg:text-6xl font-black text-slate-950 dark:text-white italic leading-none">{formatPrice(105)}</div>
             </div>
-            <div className="space-y-2 border-l border-black/10 pl-8 lg:pl-12">
-              <div className="text-[10px] font-black text-black/50 uppercase tracking-widest">Global Ops</div>
-              <div className="text-2xl lg:text-3xl font-black text-white uppercase italic tracking-tighter">EU Network</div>
+            <div className="space-y-2 border-l border-slate-950/10 dark:border-white/10 pl-8 lg:pl-12">
+              <div className="text-[10px] font-black text-slate-950/50 dark:text-white/50 uppercase tracking-widest">Global Ops</div>
+              <div className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-accent uppercase italic tracking-tighter">EU Network</div>
             </div>
           </div>
 
@@ -970,12 +1041,12 @@ const InternshipShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) =
 );
 
 const CatalogView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) => (
-  <div className="bg-purple-300 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen">
+  <div className="bg-purple-600 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen transition-colors duration-500 section-fade-bottom">
     <div className="max-w-7xl mx-auto space-y-24">
       <div className="space-y-8 max-w-4xl">
-        <div className="geometric-badge bg-black text-white">Deployment Ready</div>
-        <h1 className="text-7xl md:text-[9rem] leading-[0.8] italic uppercase text-black drop-shadow-none">Subject <br /><span className="text-white underline">Catalog.</span></h1>
-        <p className="text-xl text-black font-black italic underline decoration-white/30 drop-shadow-none">Module-specific rescue operations. Don't let one technical failure jeopardize your entire degree.</p>
+        <div className="geometric-badge bg-black dark:bg-white text-white dark:text-slate-900">Deployment Ready</div>
+        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] leading-[0.8] italic uppercase text-white drop-shadow-none">Subject <br /><span className="text-white underline decoration-accent">Catalog.</span></h1>
+        <p className="text-xl text-white font-black italic underline decoration-white/30 drop-shadow-none">Module-specific rescue operations. Don't let one technical failure jeopardize your entire degree.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1010,19 +1081,22 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
   const subject = SUBJECTS.find(s => s.id === subjectId) || SUBJECTS[0];
   
   return (
-    <div className="bg-bg pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative transition-colors duration-500">
+    <div className="bg-purple-600 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative transition-colors duration-500">
+      <div className="absolute inset-0 bg-accent/5 blur-[120px] pointer-events-none" />
       <div className="max-w-7xl mx-auto space-y-24 relative z-10">
         <div className="space-y-12 max-w-5xl">
           <button 
             onClick={() => setPage('subject-catalog')}
-            className="text-[10px] font-black text-slate-400 dark:text-white/50 uppercase tracking-widest hover:text-accent transition-colors flex items-center gap-4 group"
+            className="text-[10px] font-black text-slate-950 dark:text-white/40 uppercase tracking-widest hover:text-accent transition-colors flex items-center gap-4 group"
           >
-            <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded-full border border-slate-950/20 dark:border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
               <ArrowRight className="rotate-180" size={14} />
             </div>
             Protocol Return: Inventory
           </button>
-          <h1 className="text-5xl sm:text-7xl md:text-[10rem] italic leading-[0.7] uppercase underline decoration-accent/10 tracking-tighter text-slate-900 dark:text-white drop-shadow-2xl">{subject.name}</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black italic leading-[1] uppercase tracking-tighter text-slate-950 dark:text-white max-w-4xl">
+            {subject.name}
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -1030,7 +1104,7 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ y: -10 }}
-            className="geometric-card-featured p-10 lg:p-16 space-y-12 flex flex-col justify-between border-4 lg:border-8 border-accent shadow-3xl !bg-black/60 backdrop-blur-xl !text-white"
+            className="glass-blue p-10 lg:p-16 space-y-12 flex flex-col justify-between border-none !text-white rounded-[3rem]"
           >
             <div className="space-y-10">
               <div className="flex justify-between items-start">
@@ -1070,14 +1144,14 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
             whileHover={{ y: -10 }}
-            className="geometric-card p-10 lg:p-16 space-y-12 flex flex-col justify-between group !bg-black/40 backdrop-blur-md"
+            className="geometric-card p-10 lg:p-16 space-y-12 flex flex-col justify-between group !bg-black dark:!bg-black/40 backdrop-blur-md"
           >
             <div className="space-y-10">
               <div className="flex justify-between items-start">
                 <div className="geometric-badge bg-white/10 !text-white">Oversight Hub</div>
                 <div className="text-right">
                   <div className="text-[10px] font-black text-white/50 uppercase tracking-widest">Duration</div>
-                  <div className="text-xl font-black italic text-white uppercase tracking-tighter">Lifecycle</div>
+                  <div className="text-xl font-black italic text-white uppercase tracking-tighter">1 Month</div>
                 </div>
               </div>
               <h3 className="text-5xl italic leading-none text-white tracking-tighter uppercase drop-shadow-xl">Support <br />Hub</h3>
@@ -1112,13 +1186,10 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
           animate={{ opacity: 1, y: 0 }}
           className="relative rounded-[3rem] lg:rounded-[4rem] overflow-hidden border-4 border-white/5 shadow-3xl aspect-[21/9] group bg-black"
         >
-          <video 
+          <ShieldVideoBackground 
             src="https://degreegate.pl/wp-content/uploads/2026/04/ggg.mp4" 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            className="w-full h-full object-contain grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700"
+            thumbnail="https://picsum.photos/seed/tactical-brief/1200/600"
+            innerClassName="grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
           <div className="absolute bottom-12 left-12 space-y-4">
@@ -1134,31 +1205,28 @@ const SubjectDetailView = ({ subjectId, setPage, formatPrice }: { subjectId: str
   );
 };
 
-const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string }) => (
-  <div className="bg-yellow-400 dark:bg-slate-950 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen transition-colors duration-500">
+const ExpertAdviceView = ({ setPage, formatPrice }: { setPage: (p: PageId) => void, formatPrice: (b: number) => string }) => (
+  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 overflow-hidden relative min-h-screen transition-colors duration-500">
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black/[0.03] dark:text-white/[0.02] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none">
       Elite
     </div>
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
         <div className="geometric-badge mx-auto bg-black dark:bg-accent text-white">Direct Intel Channel</div>
-        <h1 className="text-6xl sm:text-7xl md:text-9xl leading-[0.8] italic uppercase text-black dark:text-white tracking-tighter drop-shadow-none">Expert <br /><span className="text-white dark:text-accent underline decoration-4 underline-offset-[12px]">Advice.</span></h1>
-        <p className="text-xl text-black dark:text-slate-400 font-black italic underline decoration-white/30 leading-relaxed drop-shadow-none">30 minutes of brutal, strategic honesty. The information the university doesn't want you to have.</p>
+        <h1 className="text-6xl sm:text-7xl md:text-9xl leading-[0.8] italic uppercase text-slate-900 dark:text-white tracking-tighter drop-shadow-none">Expert <br /><span className="text-slate-950 dark:text-accent underline decoration-4 underline-offset-[12px]">Advice.</span></h1>
+        <p className="text-xl text-slate-950 dark:text-slate-400 font-black italic underline decoration-white/30 leading-relaxed drop-shadow-none">30 minutes of brutal, strategic honesty. The information the university doesn't want you to have.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
         <motion.div 
           whileHover={{ y: -20, perspective: 1000, rotateY: 5 }}
-          className="geometric-card p-1 flex flex-col justify-between group shadow-xl border-none overflow-hidden rounded-[3rem] lg:rounded-[4rem]"
+          className="geometric-card !bg-black p-1 flex flex-col justify-between group shadow-xl border-none overflow-hidden rounded-[3rem] lg:rounded-[4rem]"
         >
           <div className="relative aspect-[3/4] overflow-hidden bg-black">
-            <video 
+            <ShieldVideoBackground 
               src="https://degreegate.pl/wp-content/uploads/2026/04/kkk.mp4" 
-              autoPlay 
-              muted 
-              loop 
-              playsInline
-              className="w-full h-full object-contain transition-transform duration-[2000ms] group-hover:scale-110"
+              thumbnail="https://picsum.photos/seed/advice-local/600/800"
+              innerClassName="transition-transform duration-[2000ms] group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all" />
             <div className="absolute bottom-8 right-8">
@@ -1171,7 +1239,12 @@ const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string 
             </div>
             <h2 className="text-4xl text-white italic uppercase tracking-tighter">Inside Europe</h2>
             <p className="text-lg text-white/70 font-medium leading-relaxed italic">For students already in the EU. Disputes, legal aid, or aggressive career pivots. Support in university regulations.</p>
-            <button className="geometric-button-primary w-full !py-8 text-xl !rounded-[2rem] shadow-2xl shadow-accent/20 italic mt-8">Initialize Local Ops</button>
+            <button 
+              onClick={() => setPage('contact')}
+              className="geometric-button-primary w-full !py-8 text-xl !rounded-[2rem] shadow-2xl shadow-accent/20 italic mt-8"
+            >
+              Initialize Local Ops
+            </button>
           </div>
         </motion.div>
 
@@ -1181,13 +1254,10 @@ const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string 
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent opacity-5 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="relative aspect-[3/4] overflow-hidden bg-black">
-            <video 
+            <ShieldVideoBackground 
               src="https://degreegate.pl/wp-content/uploads/2026/04/ggg.mp4" 
-              autoPlay 
-              muted 
-              loop 
-              playsInline
-              className="w-full h-full object-contain transition-transform duration-[2000ms] group-hover:scale-110"
+              thumbnail="https://picsum.photos/seed/advice-global/600/800"
+              innerClassName="transition-transform duration-[2000ms] group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all" />
             <div className="absolute bottom-8 right-8">
@@ -1200,7 +1270,12 @@ const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string 
             </div>
             <h2 className="text-4xl text-white italic uppercase tracking-tighter">Outside Europe</h2>
             <p className="text-lg text-white/70 font-medium leading-relaxed italic">Thinking of migrating? Get the unfiltered truth from professionals living the reality. Don't buy a dream, buy a plan.</p>
-            <button className="geometric-button-secondary w-full !py-8 text-xl !rounded-[2rem] border-white/10 italic mt-8 !text-white hover:!bg-white hover:!text-primary transition-all">Initialize Global Intel</button>
+            <button 
+              onClick={() => setPage('contact')}
+              className="geometric-button-secondary w-full !py-8 text-xl !rounded-[2rem] border-white/10 italic mt-8 !text-white hover:!bg-white hover:!text-primary transition-all"
+            >
+              Initialize Global Intel
+            </button>
           </div>
         </motion.div>
       </div>
@@ -1208,7 +1283,7 @@ const ExpertAdviceView = ({ formatPrice }: { formatPrice: (b: number) => string 
   </div>
 );
 
-const DegreeGatewayView = () => {
+const DegreeGatewayView = ({ setPage }: { setPage: (p: PageId) => void }) => {
   const [formData, setFormData] = React.useState({
     firstName: '',
     lastName: '',
@@ -1242,7 +1317,7 @@ const DegreeGatewayView = () => {
   };
 
   const benefits = [
-    { title: "Free webinars on real student challenges", icon: Tv, color: "bg-blue-500" },
+    { title: "Free webinars on real student challenges", icon: Tv, color: "bg-purple-500" },
     { title: "Live Q&A with expert mentors", icon: Users, color: "bg-emerald-500" },
     { title: "Early access to DegreeGate resources", icon: Zap, color: "bg-amber-500" },
     { title: "First access to new programs and offers", icon: Star, color: "bg-rose-500" },
@@ -1255,29 +1330,29 @@ const DegreeGatewayView = () => {
   ];
 
   return (
-    <div className="bg-bg pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen transition-colors duration-500">
+    <div className="bg-yellow-400 pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen transition-colors duration-500 section-fade-bottom">
       <div className="max-w-7xl mx-auto space-y-16 sm:space-y-32">
         {/* Hero Section */}
         <div className="text-center space-y-4 sm:space-y-8 max-w-4xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-block px-3 py-1 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
+            className="inline-block px-3 py-1 rounded-full bg-black dark:bg-white text-white dark:text-slate-900 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] italic text-center"
           >
             PROTOCOL: GATEWAY
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-3xl sm:text-5xl md:text-8xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-[0.95] sm:leading-[0.85]"
+            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-white leading-[0.95] sm:leading-[0.85]"
           >
-            Your Access to the <br /> <span className="text-accent underline decoration-4 sm:decoration-8 underline-offset-4 sm:underline-offset-8">DegreeGate Inner Circle.</span>
+            Your Access to the <br /> <span className="text-white underline decoration-accent decoration-4 lg:decoration-8 underline-offset-4 lg:underline-offset-8">DegreeGate Inner Circle.</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-base sm:text-xl md:text-2xl text-slate-500 dark:text-slate-400 font-medium italic max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-xl md:text-2xl text-white font-medium italic max-w-2xl mx-auto leading-relaxed"
           >
             An exclusive community for international students in Europe. Join the first wave.
           </motion.p>
@@ -1307,19 +1382,22 @@ const DegreeGatewayView = () => {
         {/* How It Works */}
         <div className="grid lg:grid-cols-2 gap-12 sm:gap-24 items-start">
           <div className="space-y-8 sm:space-y-16">
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center gap-3 sm:gap-4 justify-start">
-                <Star className="text-accent fill-accent" size={24} />
-                <h2 className="text-3xl sm:text-7xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white">How It Works.</h2>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-start">
+                <div className="flex items-center gap-2">
+                  <Star className="text-accent fill-accent shrink-0" size={16} />
+                  <h2 className="text-lg sm:text-4xl md:text-6xl lg:text-7xl font-black italic uppercase tracking-tighter text-white bg-black px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-2xl shadow-xl border border-white/5 whitespace-nowrap">Protocol:</h2>
+                </div>
+                <h2 className="text-lg sm:text-4xl md:text-6xl lg:text-7xl font-black italic uppercase tracking-tighter text-white bg-black px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-2xl shadow-xl border border-white/5"><span className="text-accent underline decoration-white/20">Process.</span></h2>
               </div>
-              <div className="w-16 sm:w-32 h-1.5 sm:h-2.5 bg-accent rounded-full" />
+              <div className="w-12 sm:w-32 h-1 sm:h-2.5 bg-accent rounded-full animate-pulse mt-2" />
             </div>
-            <div className="space-y-8 sm:space-y-12">
+            <div className="space-y-6 sm:space-y-12">
               {steps.map((s, i) => (
                 <div key={i} className="flex gap-4 sm:gap-10 group items-start">
-                  <div className="text-4xl sm:text-6xl font-black text-slate-200 dark:text-white/5 group-hover:text-accent/20 transition-colors italic leading-none">{s.n}</div>
-                  <div className="pt-0.5 sm:pt-2">
-                    <p className="text-lg sm:text-2xl font-black italic text-slate-600 dark:text-slate-400 leading-tight uppercase tracking-tight max-w-sm group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{s.t}</p>
+                  <div className="text-3xl sm:text-5xl md:text-6xl font-black text-white/40 group-hover:text-accent/60 transition-colors italic leading-none shrink-0">{s.n}</div>
+                  <div className="pt-1 sm:pt-2">
+                    <p className="text-base sm:text-xl md:text-2xl font-black italic text-white leading-tight uppercase tracking-tight max-w-sm group-hover:text-white transition-colors">{s.t}</p>
                   </div>
                 </div>
               ))}
@@ -1328,7 +1406,7 @@ const DegreeGatewayView = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => document.getElementById('signup-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 sm:px-10 sm:py-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black italic uppercase tracking-widest text-[10px] sm:text-sm rounded-2xl shadow-xl hover:opacity-90 transition-all border-b-4 border-accent"
+                className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-5 sm:px-10 sm:py-6 bg-black dark:bg-white text-white dark:text-slate-900 font-black italic uppercase tracking-widest text-[10px] sm:text-sm rounded-2xl shadow-xl hover:opacity-90 transition-all border-b-4 border-accent"
               >
                 <Star size={16} className="fill-accent text-accent" />
                 Begin Application Now
@@ -1337,7 +1415,7 @@ const DegreeGatewayView = () => {
           </div>
 
           {/* Signup Form */}
-          <div id="signup-form" className="p-6 sm:p-10 lg:p-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
+          <div id="signup-form" className="p-6 sm:p-10 lg:p-16 bg-white dark:bg-black border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 dark:bg-accent/20 blur-[100px] -translate-y-1/2 translate-x-1/2" />
             
             {status === 'success' ? (
@@ -1358,7 +1436,7 @@ const DegreeGatewayView = () => {
                 </button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+              <form data-netlify="false" onSubmit={handleSubmit} className="space-y-6 relative z-10">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 italic ml-4">First Name</label>
@@ -1366,7 +1444,7 @@ const DegreeGatewayView = () => {
                       required
                       type="text" 
                       placeholder="ENTER"
-                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
+                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                       value={formData.firstName}
                       onChange={e => setFormData({...formData, firstName: e.target.value})}
                     />
@@ -1377,7 +1455,7 @@ const DegreeGatewayView = () => {
                       required
                       type="text" 
                       placeholder="ENTER"
-                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
+                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                       value={formData.lastName}
                       onChange={e => setFormData({...formData, lastName: e.target.value})}
                     />
@@ -1389,7 +1467,7 @@ const DegreeGatewayView = () => {
                     required
                     type="email" 
                     placeholder="name@university.com"
-                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                     value={formData.email}
                     onChange={e => setFormData({...formData, email: e.target.value})}
                   />
@@ -1401,7 +1479,7 @@ const DegreeGatewayView = () => {
                     required
                     type="text" 
                     placeholder="ENTER UNIVERSITY"
-                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                     value={formData.university}
                     onChange={e => setFormData({...formData, university: e.target.value})}
                   />
@@ -1412,7 +1490,7 @@ const DegreeGatewayView = () => {
                     required
                     type="text" 
                     placeholder="ENTER COUNTRY"
-                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-accent transition-colors placeholder:text-slate-300 dark:placeholder:text-white/10 font-bold italic uppercase text-sm"
                     value={formData.country}
                     onChange={e => setFormData({...formData, country: e.target.value})}
                   />
@@ -1438,22 +1516,27 @@ const DegreeGatewayView = () => {
   );
 };
 
-const AboutView = () => (
-  <div className="bg-yellow-400 dark:bg-slate-950 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500">
+const AboutView = ({ setPage }: { setPage: (p: PageId) => void }) => (
+  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500 section-fade-bottom">
     <div className="absolute top-0 right-0 w-[80vw] lg:w-[40vw] h-full bg-black/5 dark:bg-white/5 border-l border-black/5 z-0 backdrop-blur-sm" />
     <div className="max-w-7xl mx-auto space-y-32 relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-center">
         <div className="space-y-12">
           <div className="space-y-8">
-            <div className="geometric-badge bg-black dark:bg-white text-white dark:text-slate-900">Operational History</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[108px] leading-[0.7] italic uppercase tracking-tighter text-black dark:text-white drop-shadow-none">The <br /><span className="text-white dark:text-accent underline decoration-8 text-[99px]">DegreeGate</span><br /> Narrative.</h1>
-            <p className="text-xl md:text-2xl italic font-black max-w-lg border-l-[12px] border-black dark:border-accent pl-10 text-black dark:text-slate-400 drop-shadow-none">We didn't start as a business. We started as students who realized the system was built to be broken, and then we mastered the cracks.</p>
+            <div className="geometric-badge bg-black dark:bg-accent text-white">Operational History</div>
+            <h1 className="text-6xl sm:text-7xl md:text-[108px] leading-[0.7] italic uppercase tracking-tighter text-white drop-shadow-none">The <br /><span className="text-white underline decoration-accent decoration-8 text-[99px]">DegreeGate</span><br /> Narrative.</h1>
+            <p className="text-xl md:text-2xl italic font-black max-w-lg border-l-[12px] border-white pl-10 text-white drop-shadow-none">We didn't start as a business. We started as students who realized the system was built to be broken, and then we mastered the cracks.</p>
           </div>
-          <div className="space-y-8 text-black/80 dark:text-slate-400 text-sm leading-relaxed font-black max-w-xl italic">
-             <p>Founded by graduates who navigated the complex academic landscape of Europe, DegreeGate was born out of one simple truth: <strong className="text-black dark:text-white italic drop-shadow-none">Traditional support is slow, expensive, and fundamentally out of touch with high-impact reality.</strong></p>
+          <div className="space-y-8 text-white text-sm leading-relaxed font-black max-w-xl italic">
+             <p>Founded by graduates who navigated the complex academic landscape of Europe, DegreeGate was born out of one simple truth: <strong className="text-white italic drop-shadow-none">Traditional support is slow, expensive, and fundamentally out of touch with high-impact reality.</strong></p>
              <p>Our mentors aren't just academics. They are mercenaries of the corporate world who have scaled their own careers into global powerhouses like Amazon, Google, and beyond. We don't just teach modules; we deployment career assets.</p>
           </div>
-          <button className="geometric-button-primary px-16 py-7 italic shadow-2xl shadow-black/10 !rounded-[2rem] bg-black dark:bg-white text-white dark:text-slate-900 border-black dark:border-white hover:bg-black/90 dark:hover:bg-slate-200">Audit Our Sector</button>
+          <button 
+            onClick={() => setPage('contact')}
+            className="geometric-button-primary px-16 py-7 italic shadow-2xl shadow-black/10 !rounded-[2rem] bg-black dark:bg-white text-white dark:text-black border-black dark:border-white hover:bg-black/90 dark:hover:bg-white/90"
+          >
+            Audit Our Sector
+          </button>
         </div>
         <motion.div 
           whileHover={{ perspective: 1000, rotateY: 10, rotateX: 5 }}
@@ -1518,7 +1601,7 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
 
   if (status === 'success') {
     return (
-      <div className="bg-purple-300 pt-[200px] min-h-screen flex items-center justify-center px-6">
+      <div className="bg-purple-600 pt-[200px] min-h-screen flex items-center justify-center px-6">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -1536,28 +1619,32 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
   }
 
   return (
-  <div className="bg-bg pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500">
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.05),transparent)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.02),transparent)]" />
+  <div className="bg-purple-600 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500 section-fade-bottom">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.02),transparent)]" />
     <div className="max-w-7xl mx-auto relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32">
         <div className="space-y-16">
           <div className="space-y-8">
-            <div className="geometric-badge bg-slate-900 dark:bg-accent text-white">Direct Channel</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[85px] text-slate-900 dark:text-white tracking-tighter leading-[0.8] italic uppercase underline decoration-slate-200 dark:decoration-white/10">Contact <br /><span className="text-accent dark:text-primary">Support.</span></h1>
-            <p className="text-xl text-slate-500 dark:text-slate-400 font-bold italic underline decoration-slate-100 dark:decoration-white/5 leading-relaxed">Get in touch with us. We are here to help you with your academic and career queries.</p>
+            <div className="geometric-badge bg-accent text-white">Direct Channel</div>
+            <h1 className="text-6xl sm:text-7xl md:text-[85px] tracking-tighter leading-[0.8] italic uppercase text-white">
+              Contact <br /><span className="text-white underline decoration-accent">Support.</span>
+            </h1>
+            <p className="text-xl text-white font-bold italic underline decoration-white/10 leading-relaxed">Get in touch with us. We are here to help you with your academic and career queries.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-8 lg:gap-10">
             {[
-              { label: 'Priority Support', value: '24/7 Global Response', icon: <ShieldCheck /> },
-              { label: 'Asset Support', value: <span className="text-base not-italic underline">help@degreegate.com</span>, icon: <GraduationCap /> },
+              { label: 'Global RE-X 424', value: '24/7 GLOBAL RESPONSE', icon: <div className="p-3 sm:p-5 bg-accent text-white rounded-2xl sm:rounded-3xl shadow-2xl"><ShieldCheck size={40} /></div> },
+              { label: 'Asset Support', value: <span className="lowercase underline text-accent">help@degreegate.com</span>, icon: <div className="p-3 sm:p-5 glass-blue text-white rounded-2xl sm:rounded-3xl shadow-2xl"><GraduationCap size={40} /></div> },
             ].map((item, i) => (
-              <div key={i} className="space-y-4 group cursor-pointer text-slate-900 dark:text-white">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 transition-all shadow-xl">{item.icon}</div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/40">{item.label}</span>
+              <div key={i} className="space-y-6 group cursor-pointer glass-dark p-8 md:p-12 rounded-[3rem] hover:bg-white/5 transition-all">
+                <div className="flex items-center gap-6">
+                  {item.icon}
+                  <span className="text-xs font-black uppercase tracking-[0.4em] text-white">{item.label}</span>
                 </div>
-                <div className="font-black text-xl lg:text-2xl italic tracking-tight uppercase">{item.value}</div>
+                <div className="font-black text-xl sm:text-2xl lg:text-3xl xl:text-4xl italic tracking-tighter text-white group-hover:text-accent transition-all duration-300 transform group-hover:translate-x-2 leading-tight break-all">
+                  {typeof item.value === 'string' ? <span className="uppercase text-white">{item.value}</span> : item.value}
+                </div>
               </div>
             ))}
           </div>
@@ -1566,19 +1653,19 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
             <div className="flex gap-8">
               <button 
                 onClick={() => setPage('privacy')}
-                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all"
+                className="text-[10px] font-black text-white/50 uppercase tracking-widest hover:text-accent transition-all"
               >
                 [Privacy Policy]
               </button>
               <button 
                 onClick={() => setPage('terms')}
-                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all"
+                className="text-[10px] font-black text-white/50 uppercase tracking-widest hover:text-accent transition-all"
               >
                 [Terms of Service]
               </button>
               <button 
                 onClick={() => setPage('blog')}
-                className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-accent transition-all"
+                className="text-[10px] font-black text-white/50 uppercase tracking-widest hover:text-accent transition-all"
               >
                 [Intelligence Blog]
               </button>
@@ -1589,7 +1676,7 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="geometric-card p-10 lg:p-20 !bg-black/40 backdrop-blur-md space-y-12 shadow-3xl rounded-[3rem] lg:rounded-[5rem] border-white/10"
+          className="geometric-card p-10 lg:p-20 !bg-black space-y-12 shadow-3xl rounded-[3rem] lg:rounded-[5rem] border-white/10"
         >
           <div className="space-y-4">
             <h3 className="text-5xl italic tracking-tighter text-white uppercase leading-none">Contact <br /> Us</h3>
@@ -1597,45 +1684,49 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
           </div>
           <form 
             onSubmit={handleSubmit}
+            data-netlify="true"
+            name="contact"
             className="space-y-10" 
           >
             <input type="hidden" name="form-name" value="contact" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">First Name</label>
-                <input name="first_name" type="text" required placeholder="Enter your first name" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <label className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] ml-6 italic text-left block">First Name</label>
+                <input name="first_name" type="text" required placeholder="Enter your first name" className="w-full bg-black/60 border border-white/20 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/40 italic" />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">Last Name</label>
-                <input name="last_name" type="text" required placeholder="Enter your last name" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <label className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] ml-6 italic text-left block">Last Name</label>
+                <input name="last_name" type="text" required placeholder="Enter your last name" className="w-full bg-black/60 border border-white/20 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/40 italic" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic text-left block">Email Address</label>
-                <input name="email" type="email" required placeholder="Enter your email" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <label className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] ml-6 italic text-left block">Email Address</label>
+                <input name="email" type="email" required placeholder="Enter your email" className="w-full bg-black/60 border border-white/20 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/40 italic" />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic">Subject</label>
-                <input name="subject" type="text" required placeholder="Subject of message" className="w-full bg-black/40 border border-white/10 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/20 italic" />
+                <label className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] ml-6 italic">Subject</label>
+                <input name="subject" type="text" required placeholder="Subject of message" className="w-full bg-black/60 border border-white/20 rounded-full px-10 py-6 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all placeholder:text-white/40 italic" />
               </div>
             </div>
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6 italic">Message</label>
-              <textarea name="message" required placeholder="Your message..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-[40px] px-10 py-8 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all resize-none placeholder:text-white/20 italic" />
+              <label className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] ml-6 italic">Message</label>
+              <textarea name="message" required placeholder="Your message..." rows={4} className="w-full bg-black/60 border border-white/20 rounded-[40px] px-10 py-8 text-sm font-bold text-white focus:border-accent focus:outline-none transition-all resize-none placeholder:text-white/40 italic" />
             </div>
             
             {status === 'error' && (
               <p className="text-red-500 text-[10px] font-black uppercase italic text-center">Something went wrong. Please try again.</p>
             )}
 
-            <button 
-              type="submit" 
-              disabled={status === 'loading'}
-              className="geometric-button-primary w-full !py-8 text-xl italic shadow-2xl shadow-accent/20 !rounded-[2.5rem] disabled:opacity-50"
-            >
-              {status === 'loading' ? 'Sending...' : 'Submit'}
-            </button>
+            <div className="flex justify-start">
+              <button 
+                type="submit" 
+                disabled={status === 'loading'}
+                className="geometric-button-primary w-full lg:w-auto lg:px-24 !py-8 text-xl italic shadow-2xl shadow-accent/20 !rounded-[2.5rem] disabled:opacity-50"
+              >
+                {status === 'loading' ? 'Sending...' : 'Submit Signal'}
+              </button>
+            </div>
           </form>
         </motion.div>
       </div>
@@ -1646,12 +1737,12 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
 
 
 const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => (
-  <div className="bg-bg pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500">
+  <div className="bg-yellow-400 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500 section-fade-bottom">
     <div className="max-w-7xl mx-auto space-y-20 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
-        <div className="geometric-badge mx-auto bg-slate-900 dark:bg-accent text-white">Intelligence Pipeline</div>
-        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-900 dark:text-white tracking-tighter">Strategic <br /><span className="text-accent dark:text-primary underline">Intel.</span></h1>
-        <p className="text-xl text-slate-500 dark:text-slate-400 font-bold italic border-x border-slate-200 dark:border-white/10 px-10">Operational briefings, system updates, and academic extraction tactics.</p>
+        <div className="geometric-badge mx-auto bg-black dark:bg-accent text-white">Intelligence Pipeline</div>
+        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-white tracking-tighter">Strategic <br /><span className="text-white underline decoration-accent">Intel.</span></h1>
+        <p className="text-xl text-white font-bold italic border-x border-white/20 px-10">Operational briefings, system updates, and academic extraction tactics.</p>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
@@ -1661,7 +1752,7 @@ const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, 
             onClick={() => setPage('blog-post', post.slug)}
             className="geometric-card p-10 space-y-8 group cursor-pointer"
           >
-            <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-2xl overflow-hidden relative border border-slate-100 dark:border-white/5">
+            <div className="aspect-video bg-black/40 dark:bg-white/5 rounded-2xl overflow-hidden relative border border-white/5">
                <img src={post.featured_image || 'https://picsum.photos/seed/degreegate/800/600'} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
             </div>
             <div className="space-y-4">
@@ -1676,7 +1767,7 @@ const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, 
         ))}
         {posts.length === 0 && (
           <div className="col-span-full py-20 text-center">
-             <div className="text-slate-300 italic font-black text-xl uppercase tracking-widest">Signal Awaiting Data...</div>
+             <div className="text-white italic font-black text-xl uppercase tracking-widest">Signal Awaiting Data...</div>
           </div>
         )}
       </div>
@@ -1685,19 +1776,22 @@ const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, 
 );
 
 const BlogPostView = ({ post, setPage }: { post: BlogPost, setPage: (p: PageId) => void }) => (
-  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+  <div className="bg-purple-600 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen transition-colors duration-500">
     <div className="max-w-4xl mx-auto space-y-16">
       <button 
         onClick={() => setPage('blog')}
-        className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-4"
+        className="text-[10px] font-black text-slate-950/40 dark:text-white/40 uppercase tracking-widest hover:text-accent transition-colors flex items-center gap-4 group"
       >
-        <ArrowRight className="rotate-180" size={14} /> Back to Intel Pipeline
+        <div className="w-8 h-8 rounded-full border border-slate-950/20 dark:border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
+          <ArrowRight className="rotate-180" size={14} />
+        </div>
+        Back to Intel Pipeline
       </button>
 
       <div className="space-y-8 text-center md:text-left">
-        <div className="geometric-badge bg-black text-white">{new Date(post.date).toLocaleDateString()}</div>
-        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-900 tracking-tighter leading-none">{post.title}</h1>
-        <p className="text-xl text-slate-500 font-bold italic border-l-8 border-yellow-400 pl-8">{post.description}</p>
+        <div className="geometric-badge bg-black dark:bg-accent text-white">{new Date(post.date).toLocaleDateString()}</div>
+        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-slate-950 dark:text-white tracking-tighter leading-none">{post.title}</h1>
+        <p className="text-xl text-slate-950 dark:text-blue-100/70 font-bold italic border-l-8 border-accent pl-8">{post.description}</p>
       </div>
 
       <div className="aspect-video rounded-[3rem] overflow-hidden border border-slate-200 shadow-2xl">
@@ -1712,24 +1806,24 @@ const BlogPostView = ({ post, setPage }: { post: BlogPost, setPage: (p: PageId) 
 );
 
 const PrivacyView = () => (
-  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+  <div className="bg-purple-600 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen transition-colors duration-500">
     <div className="max-w-4xl mx-auto space-y-16">
       <div className="space-y-6">
-        <div className="geometric-badge bg-black text-white">Security Protocol</div>
-        <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter">Privacy <span className="text-yellow-500">Shield.</span></h1>
+        <div className="geometric-badge bg-black dark:bg-accent text-white">Security Protocol</div>
+        <h1 className="text-6xl font-black italic uppercase text-slate-950 dark:text-white tracking-tighter">Privacy <span className="text-white underline decoration-accent">Shield.</span></h1>
       </div>
-      <div className="prose prose-slate max-w-none space-y-8 text-slate-600 font-medium italic">
+      <div className="prose prose-slate dark:prose-invert max-w-none space-y-8 text-slate-950 font-medium italic">
         <section className="space-y-4">
-          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">01. Signal Encryption</h2>
+          <h2 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight italic">01. Signal Encryption</h2>
           <p>We respect your tactical data. All intelligence signals sent via DegreeGate are encrypted using enterprise-grade protocols. Your personal academic footprint is treated with the highest level of security.</p>
         </section>
         <section className="space-y-4">
-          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">02. Data Extraction</h2>
+          <h2 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight italic">02. Data Extraction</h2>
           <p>We only collect the minimum intelligence necessary to facilitate your academic protection. This includes your contact vectors and university sector details.</p>
         </section>
-        <div className="p-8 bg-slate-100 rounded-3xl border border-slate-200">
-          <p className="text-xs uppercase tracking-widest font-black text-slate-400 mb-2">Update status</p>
-          <p className="text-lg font-black text-slate-900 italic uppercase tracking-tighter">Current Revision: April 2026</p>
+        <div className="p-8 bg-black/5 dark:bg-white/5 rounded-3xl border border-black/10 dark:border-white/10">
+          <p className="text-xs uppercase tracking-widest font-black text-slate-400 dark:text-white/40 mb-2">Update status</p>
+          <p className="text-lg font-black text-slate-950 dark:text-white italic uppercase tracking-tighter">Current Revision: April 2026</p>
         </div>
       </div>
     </div>
@@ -1737,19 +1831,19 @@ const PrivacyView = () => (
 );
 
 const TermsView = () => (
-  <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+  <div className="bg-yellow-400 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen transition-colors duration-500">
     <div className="max-w-4xl mx-auto space-y-16">
       <div className="space-y-6">
-        <div className="geometric-badge bg-black text-white">Engagement Protocol</div>
-        <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter">Terms of <span className="text-yellow-500">Service.</span></h1>
+        <div className="geometric-badge bg-black dark:bg-accent text-white">Engagement Protocol</div>
+        <h1 className="text-6xl font-black italic uppercase text-slate-950 dark:text-white tracking-tighter">Terms of <span className="text-accent">Service.</span></h1>
       </div>
-      <div className="prose prose-slate max-w-none space-y-8 text-slate-600 font-medium italic">
+      <div className="prose prose-slate dark:prose-invert max-w-none space-y-8 text-slate-950 font-medium italic">
         <section className="space-y-4">
-          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">01. Service Deployment</h2>
+          <h2 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight italic">01. Service Deployment</h2>
           <p>By initializing a signal with DegreeGate, you agree to our engagement protocols. Our shields are architectural in nature; we provide tactical guidance, not academic dishonesty.</p>
         </section>
         <section className="space-y-4">
-          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">02. Operational Limits</h2>
+          <h2 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight italic">02. Operational Limits</h2>
           <p>DegreeGate is an intelligence network. We do not guarantee specific outcomes but provide the highest level of strategic preparation possible under current global university regulations.</p>
         </section>
       </div>
@@ -1947,7 +2041,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
             <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Encrypted Administrative Gateway</p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form data-netlify="false" onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">Access Secret</label>
               <input 
@@ -1985,12 +2079,12 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
   }
 
   return (
-    <div className="bg-slate-50 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen">
+    <div className="bg-purple-600 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen transition-colors duration-500">
       <div className="max-w-7xl mx-auto space-y-16">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b-4 border-black pb-12">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b-4 border-slate-900 dark:border-white pb-12">
           <div>
             <div className="geometric-badge bg-black text-white">Active Tactical Session</div>
-            <h1 className="text-6xl font-black italic uppercase text-slate-900 tracking-tighter mt-4">Intel. <span className="text-yellow-500">Dashboard.</span></h1>
+            <h1 className="text-6xl font-black italic uppercase text-slate-950 dark:text-white tracking-tighter mt-4">Intel. <span className="text-accent underline decoration-4">Dashboard.</span></h1>
           </div>
           <div className="flex gap-4">
             <button 
@@ -2023,7 +2117,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <form onSubmit={handleCreate} className="geometric-card bg-white border-slate-200 p-12 space-y-8 shadow-2xl">
+              <form data-netlify="false" onSubmit={handleCreate} className="geometric-card bg-white border-slate-200 p-12 space-y-8 shadow-2xl">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Intel Title</label>
@@ -2032,7 +2126,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
                       placeholder="Title of briefing..."
                       value={newPost.title}
                       onChange={e => setNewPost({...newPost, title: e.target.value})}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic"
+                      className="w-full bg-black/5 border border-black/10 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic"
                     />
                   </div>
                   <div className="space-y-2">
@@ -2042,7 +2136,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
                       required
                       value={newPost.date}
                       onChange={e => setNewPost({...newPost, date: e.target.value})}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all"
+                      className="w-full bg-black/5 border border-black/10 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -2052,7 +2146,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
                     placeholder="https://images.unsplash.com/..."
                     value={newPost.featured_image}
                     onChange={e => setNewPost({...newPost, featured_image: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all"
+                    className="w-full bg-black/5 border border-black/10 rounded-full px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
@@ -2061,7 +2155,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
                     rows={2}
                     value={newPost.description}
                     onChange={e => setNewPost({...newPost, description: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-3xl px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic resize-none"
+                    className="w-full bg-black/5 border border-black/10 rounded-3xl px-8 py-4 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic resize-none"
                     placeholder="Briefly describe the intel payload..."
                   />
                 </div>
@@ -2072,7 +2166,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
                     required
                     value={newPost.body}
                     onChange={e => setNewPost({...newPost, body: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-[2rem] px-8 py-6 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic resize-none"
+                    className="w-full bg-black/5 border border-black/10 rounded-[2rem] px-8 py-6 text-sm font-bold text-slate-900 focus:border-yellow-400 outline-none transition-all italic resize-none"
                     placeholder="# Writing intel... Use markdown standard."
                   />
                 </div>
@@ -2092,7 +2186,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
             {posts.map(post => (
               <div key={post.id} className="geometric-card bg-white border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-black transition-all">
                 <div className="flex items-center gap-6">
-                  <div className="w-20 h-14 bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shrink-0">
+                  <div className="w-20 h-14 bg-black/10 rounded-lg overflow-hidden border border-white/10 shrink-0">
                     <img src={post.featured_image} className="w-full h-full object-cover" />
                   </div>
                   <div>
@@ -2149,7 +2243,7 @@ const ControlHub = ({
             initial={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
-            className="mb-6 p-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] min-w-[320px] ring-1 ring-black/5"
+            className="mb-6 p-8 bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] min-w-[320px] ring-1 ring-black/5"
           >
             <div className="space-y-8">
               {/* Theme Toggle */}
@@ -2158,7 +2252,7 @@ const ControlHub = ({
                   <p className="text-[10px] font-black italic text-slate-400 dark:text-white/40 uppercase tracking-widest leading-none">Global Atmosphere</p>
                   <div className={`w-2 h-2 rounded-full ${theme === 'dark' ? 'bg-indigo-500 animate-pulse' : 'bg-orange-400'}`} />
                 </div>
-                <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl">
+                <div className="flex gap-2 p-1 bg-black/10 dark:bg-white/5 rounded-2xl">
                   <button 
                     onClick={() => setTheme('light')}
                     className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-xl transition-all duration-500 ${
@@ -2191,7 +2285,7 @@ const ControlHub = ({
                       className={`py-3 rounded-xl text-[10px] font-black italic uppercase transition-all duration-300 ${
                         currency === c 
                           ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20' 
-                          : 'bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-white/30 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-600 dark:hover:text-white'
+                          : 'bg-black/5 dark:bg-white/5 text-slate-400 dark:text-white/30 hover:bg-black/10 dark:hover:bg-white/10 hover:text-slate-600 dark:hover:text-white'
                       }`}
                     >
                       {c}
@@ -2343,9 +2437,9 @@ export default function App() {
       case 'internship-shield': return <InternshipShieldView setPage={setView} formatPrice={formatPrice} />;
       case 'subject-catalog': return <CatalogView setPage={setView} />;
       case 'subject-detail': return <SubjectDetailView subjectId={activeSubjectId!} setPage={setView} formatPrice={formatPrice} />;
-      case 'expert-advice': return <ExpertAdviceView formatPrice={formatPrice} />;
-      case 'degree-gateway': return <DegreeGatewayView />;
-      case 'about': return <AboutView />;
+      case 'expert-advice': return <ExpertAdviceView setPage={setView} formatPrice={formatPrice} />;
+      case 'degree-gateway': return <DegreeGatewayView setPage={setView} />;
+      case 'about': return <AboutView setPage={setView} />;
       case 'contact': return <ContactView setPage={setView} />;
       case 'blog': return <BlogView posts={posts} setPage={setView} />;
       case 'blog-post': {
@@ -2395,9 +2489,9 @@ export default function App() {
         setTheme={setTheme}
       />
 
-      <footer className="bg-slate-50 text-slate-900 py-24 px-6 md:px-10 mt-32 border-t-[10px] border-yellow-400 relative overflow-hidden">
+      <footer className="bg-white text-slate-950 py-24 px-6 md:px-10 mt-32 border-t-[10px] border-black relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/5 rounded-full blur-[120px] -mr-64 -mt-64" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-slate-200 rounded-full blur-[100px] -ml-48 -mb-48 opacity-30" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-black/10 rounded-full blur-[100px] -ml-48 -mb-48 opacity-30" />
         <div className="max-w-7xl mx-auto space-y-20 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div className="space-y-6">
@@ -2412,13 +2506,13 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex flex-col justify-center">
-                  <div className="font-display text-xl lg:text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-                    DegreeGate<span className="text-yellow-500 font-black">°</span>
+                  <div className="font-display text-xl lg:text-2xl font-black text-slate-950 tracking-tighter uppercase italic leading-none">
+                    DegreeGate<span className="text-accent font-black">°</span>
                   </div>
-                  <div className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">Tactical Strategy Hub</div>
+                  <div className="text-[7px] font-black text-slate-950/60 uppercase tracking-[0.2em] mt-0.5">Tactical Strategy Hub</div>
                 </div>
               </div>
-              <p className="text-slate-500 text-[11px] font-medium leading-relaxed max-w-xs italic uppercase tracking-tighter">
+              <p className="text-slate-950/60 text-[11px] font-medium leading-relaxed max-w-xs italic uppercase tracking-tighter">
                 Tactical academic and career protection for high-impact students. We audit the system so you don't have to.
               </p>
             </div>
@@ -2426,45 +2520,45 @@ export default function App() {
             <div className="space-y-5">
               <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Operational Sectors</h4>
               <ul className="space-y-3">
-                <li><button onClick={() => setView('thesis-shield')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Thesis Shield</button></li>
-                <li><button onClick={() => setView('internship-shield')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Internship Pipeline</button></li>
-                <li><button onClick={() => setView('subject-catalog')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Subject Catalog</button></li>
-                <li><button onClick={() => setView('degree-gateway')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Gateway Hub</button></li>
+                <li><button onClick={() => setView('thesis-shield')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Thesis Shield</button></li>
+                <li><button onClick={() => setView('internship-shield')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Internship Pipeline</button></li>
+                <li><button onClick={() => setView('subject-catalog')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Subject Catalog</button></li>
+                <li><button onClick={() => setView('degree-gateway')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Gateway Hub</button></li>
               </ul>
             </div>
             
             <div className="space-y-5">
               <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Direct Channels</h4>
               <ul className="space-y-3">
-                <li><a href="mailto:help@degreegate.com" className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">help@degreegate.com</a></li>
-                <li><button onClick={() => setView('blog')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Intelligence Blog</button></li>
-                <li><button onClick={() => setView('about')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Operational History</button></li>
-                <li><button onClick={() => setView('contact')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Contact Intel</button></li>
+                <li><a href="mailto:help@degreegate.com" className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">help@degreegate.com</a></li>
+                <li><button onClick={() => setView('blog')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Intelligence Blog</button></li>
+                <li><button onClick={() => setView('about')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Operational History</button></li>
+                <li><button onClick={() => setView('contact')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Contact Intel</button></li>
               </ul>
             </div>
 
             <div className="space-y-6">
               <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
               <ul className="space-y-3">
-                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
-                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-500 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
-                <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-slate-500/30 hover:text-yellow-600 transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
+                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
+                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
+                <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-slate-950/30 hover:text-accent transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
               </ul>
             </div>
           </div>
           
-          <div className="pt-10 border-t border-slate-200 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest italic">
+          <div className="pt-10 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-[10px] font-black text-black uppercase tracking-widest italic">
               © 2026 DegreeGate Intelligence Network. All Rights Reserved.
             </div>
             <div className="flex gap-8">
               {[
-                { icon: <Facebook size={22} />, title: "Facebook", href: "https://www.facebook.com/degreegates?rdid=mbDxmXpoAwgbSkMB&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1863a7eXUv%2F#" },
-                { icon: <X size={22} />, title: "X", href: "https://x.com/degreegates?s=21" },
-                { icon: <Instagram size={22} />, title: "Instagram", href: "https://www.instagram.com/degreegate" },
-                { icon: <Linkedin size={22} />, title: "LinkedIn", href: "https://pl.linkedin.com/company/degreegates" }
+                { icon: <Facebook size={22} />, title: "Facebook", href:socials[0].href },
+                { icon: <X size={22} />, title: "X", href: socials[1].href },
+                { icon: <Instagram size={22} />, title: "Instagram", href: socials[2].href },
+                { icon: <Linkedin size={22} />, title: "LinkedIn", href: socials[3].href }
               ].map((social, i) => (
-                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-slate-300 dark:text-white/40 hover:text-yellow-500 transition-all hover:scale-110" title={social.title}>{social.icon}</a>
+                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-slate-950/40 hover:text-black transition-all hover:scale-110" title={social.title}>{social.icon}</a>
               ))}
             </div>
           </div>

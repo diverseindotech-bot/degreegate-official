@@ -18,25 +18,22 @@
 }
 
 :root {
-  --primary-color: #1e40af;
-  --accent-color: #3b82f6;
-  --accent-light: #dbeafe;
-  --bg-color: #f8fafc;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --border-color: #e2e8f0;
-  --body-gradient: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  --primary-color: #9333ea; /* purple-600 */
+  --accent-color: #a855f7; /* purple-500 */
+  --accent-light: #faf5ff; /* purple-50 */
+  --bg-color: #fffbeb;
+  --text-primary: #000000;
+  --text-secondary: #1e293b;
+  --border-color: #000000;
+  --body-gradient: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
 }
 
 .dark {
-  --primary-color: #3b82f6;
-  --accent-color: #60a5fa;
-  --accent-light: #1e293b;
-  --bg-color: #020617;
-  --text-primary: #f8fafc;
+  --bg-color: #000000;
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --border-color: #1e293b;
-  --body-gradient: radial-gradient(circle at top right, #0f172a 0%, #020617 100%);
+  --body-gradient: radial-gradient(circle at top right, #0a0a0a 0%, #000000 100%);
 }
 
 @layer base {
@@ -45,11 +42,29 @@
     background-attachment: fixed;
     background-size: cover;
     color: var(--text-primary);
-    @apply font-sans antialiased m-0 p-0 overflow-x-hidden transition-all duration-500;
+    @apply font-sans antialiased m-0 p-0 overflow-x-hidden transition-colors duration-500;
   }
   
   h1, h2, h3 {
-    @apply font-display tracking-tight text-white uppercase;
+    @apply font-display tracking-tight text-slate-900 dark:text-white uppercase;
+  }
+
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-3xl border border-white/10 shadow-2xl;
+  }
+
+  .glass-blue {
+    @apply bg-purple-900/40 backdrop-blur-3xl border border-purple-400/20 shadow-2xl;
+  }
+
+  .glass-tactile {
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+    @apply backdrop-blur-2xl border border-white/10 shadow-inner;
+  }
+
+  .glass-glossy {
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+    @apply backdrop-blur-3xl border border-white/20 shadow-2xl;
   }
 }
 
@@ -58,11 +73,23 @@
 }
 
 @utility geometric-card {
-  @apply bg-white dark:bg-slate-900 border-[1px] dark:border-[1px] border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-[0_5px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:translate-y-[-8px] overflow-hidden text-slate-900 dark:text-white;
+  @apply bg-white dark:bg-black border-[1px] dark:border-[1px] border-black/10 dark:border-white/10 rounded-[2rem] shadow-[0_5px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:translate-y-[-8px] overflow-hidden text-black dark:text-white;
+}
+
+@utility section-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+}
+
+@utility section-fade-top {
+  mask-image: linear-gradient(to top, black 85%, transparent 100%);
+}
+
+@utility section-fade-both {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
 }
 
 @utility geometric-card-featured {
-  @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-white border-2 border-accent dark:border-primary rounded-[3rem] shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] hover:translate-y-[-12px] overflow-hidden;
+  @apply bg-white dark:bg-black text-white border-2 border-accent rounded-[3rem] shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] hover:translate-y-[-12px] overflow-hidden;
 }
 
 @utility geometric-button-primary {
