@@ -24,11 +24,11 @@ async function startServer() {
 
     // Tactical Fallback for easier setup
     if (!adminPassword) {
-      console.warn("[SIGNAL WARNING] ADMIN_PASSWORD not set. Using tactical fallback 'tactical123'");
-      adminPassword = "tactical123";
+      console.warn("[SIGNAL WARNING] ADMIN_PASSWORD not set. Using tactical fallback 'Admindg@2026'");
+      adminPassword = "Admindg@2026";
     }
 
-    if (password === adminPassword) {
+    if (password?.trim() === adminPassword?.trim()) {
       return res.json({ success: true, token: "tactical-session-" + Date.now() });
     } else {
       return res.status(401).json({ error: "REJECTED. Authentication signal mismatch." });

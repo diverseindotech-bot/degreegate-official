@@ -15,11 +15,11 @@ export const handler: Handler = async (event, context) => {
 
     // Tactical Fallback for easier setup (consistent with server.ts)
     if (!adminPassword) {
-      console.warn("[SIGNAL WARNING] ADMIN_PASSWORD not set in Netlify. Using tactical fallback 'tactical123'");
-      adminPassword = "tactical123";
+      console.warn("[SIGNAL WARNING] ADMIN_PASSWORD not set in Netlify. Using tactical fallback 'Admindg@2026'");
+      adminPassword = "Admindg@2026";
     }
 
-    if (password === adminPassword) {
+    if (password?.trim() === adminPassword?.trim()) {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },

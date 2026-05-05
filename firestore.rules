@@ -75,5 +75,20 @@ service cloud.firestore {
       allow read: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
       allow write: if false; // Managed via Firebase Console or special script
     }
+
+    // Submissions: Anyone can create, only admin can read/manage
+    function isValidSubmission(data) {
+      return data.keys().hasAll(['form_name', 'data', 'status', 'createdAt'])
+        && data.form_name is string && data.form_name.size() <= 100
+        && data.data is map
+        && data.status in ['unread', 'read', 'archived']
+        && data.createdAt == request.time;
+    }
+
+    match /submissions/{submissionId} {
+      allow create: if isValidId(submissionId)
+        && isValidSubmission(incoming());
+      allow read, update, delete: if isAdmin();
+    }
   }
 }

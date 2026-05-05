@@ -18,22 +18,22 @@
 }
 
 :root {
-  --primary-color: #9333ea; /* purple-600 */
-  --accent-color: #a855f7; /* purple-500 */
-  --accent-light: #faf5ff; /* purple-50 */
-  --bg-color: #fffbeb;
-  --text-primary: #000000;
-  --text-secondary: #1e293b;
-  --border-color: #000000;
-  --body-gradient: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  --primary-color: #7c3aed; /* deeper purple */
+  --accent-color: #8b5cf6;
+  --accent-light: #1e1b4b; /* deep indigo */
+  --bg-color: #050505; /* deep black */
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --body-gradient: radial-gradient(circle at top right, #0f172a 0%, #000000 100%);
 }
 
 .dark {
   --bg-color: #000000;
-  --text-primary: #f1f5f9;
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --border-color: #1e293b;
-  --body-gradient: radial-gradient(circle at top right, #0a0a0a 0%, #000000 100%);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --body-gradient: radial-gradient(circle at top right, #020617 0%, #000000 100%);
 }
 
 @layer base {
@@ -42,11 +42,11 @@
     background-attachment: fixed;
     background-size: cover;
     color: var(--text-primary);
-    @apply font-sans antialiased m-0 p-0 overflow-x-hidden transition-colors duration-500;
+    @apply font-sans antialiased m-0 p-0 overflow-x-hidden transition-all duration-700;
   }
   
   h1, h2, h3 {
-    @apply font-display tracking-tight text-slate-900 dark:text-white uppercase;
+    @apply font-display tracking-tight text-white uppercase;
   }
 
   .glass-dark {
@@ -73,23 +73,23 @@
 }
 
 @utility geometric-card {
-  @apply bg-white dark:bg-black border-[1px] dark:border-[1px] border-black/10 dark:border-white/10 rounded-[2rem] shadow-[0_5px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:translate-y-[-8px] overflow-hidden text-black dark:text-white;
+  @apply bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 hover:shadow-[0_20px_80px_rgba(0,0,0,0.6)] hover:translate-y-[-8px] overflow-hidden text-white;
 }
 
 @utility section-fade-bottom {
-  mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  mask-image: none;
 }
 
 @utility section-fade-top {
-  mask-image: linear-gradient(to top, black 85%, transparent 100%);
+  mask-image: none;
 }
 
 @utility section-fade-both {
-  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+  mask-image: none;
 }
 
 @utility geometric-card-featured {
-  @apply bg-white dark:bg-black text-white border-2 border-accent rounded-[3rem] shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] hover:translate-y-[-12px] overflow-hidden;
+  @apply bg-slate-900/80 backdrop-blur-xl text-white border-2 border-accent/50 rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] transition-all duration-500 hover:shadow-[0_30px_80px_rgba(0,0,0,0.6)] hover:translate-y-[-12px] overflow-hidden;
 }
 
 @utility geometric-button-primary {

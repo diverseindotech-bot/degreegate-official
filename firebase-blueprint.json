@@ -23,6 +23,18 @@
         "email": { "type": "string" },
         "role": { "type": "string", "enum": ["admin"] }
       }
+    },
+    "Submission": {
+      "title": "Form Submission",
+      "description": "Data captured from various site forms.",
+      "type": "object",
+      "properties": {
+        "form_name": { "type": "string" },
+        "data": { "type": "object" },
+        "status": { "type": "string", "enum": ["unread", "read", "archived"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["form_name", "data", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -33,6 +45,10 @@
     "/admins/{adminId}": {
       "schema": "Admin",
       "description": "Protected administrator records."
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Form submissions for admin review."
     }
   }
 }

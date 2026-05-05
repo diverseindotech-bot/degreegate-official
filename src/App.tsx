@@ -23,7 +23,8 @@ import {
   updateDoc,
   deleteDoc,
   User,
-  Timestamp
+  Timestamp,
+  serverTimestamp
 } from './lib/firebase';
 import { getDoc } from 'firebase/firestore';
 import { 
@@ -54,8 +55,6 @@ import {
   Download,
   Lock,
   Cpu,
-  Sun,
-  Moon,
   Settings
 } from 'lucide-react';
 
@@ -88,6 +87,14 @@ interface BlogPost {
   authorId?: string;
 }
 
+interface Submission {
+  id: string;
+  form_name: string;
+  data: any;
+  status: 'unread' | 'read' | 'archived';
+  createdAt: any;
+}
+
 interface Subject {
   id: string;
   name: string;
@@ -107,13 +114,86 @@ const SUBJECTS: Subject[] = [
 const socials = [
   { id: "facebook", href: "https://www.facebook.com/degreegates?rdid=mbDxmXpoAwgbSkMB&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1863a7eXUv%2F#" },
   { id: "x", href: "https://x.com/degreegates?s=21" },
-  { id: "instagram", href: "https://www.instagram.com/degreegate" },
+  { id: "instagram", href: "https://www.instagram.com/degreegates" },
   { id: "linkedin", href: "https://pl.linkedin.com/company/degreegates" }
 ];
 
 const STICKERS = ["SYSTEMS", "CLARITY", "CONSISTENCY", "PROTECTION"];
 
 // --- Components ---
+
+const FAQSection = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  const faqs = [
+    {
+      q: "Who is DegreeGate for exactly?",
+      a: "DegreeGate is designed exclusively for international students pursuing higher education in Europe. Whether you're currently in the EU facing academic challenges or outside the EU planning your migration and study path, we provide the tactical intelligence and support infrastructure you need."
+    },
+    {
+      q: "Is DegreeGate affiliated with universities?",
+      a: "No. We are an independent intelligence and support platform. This independence allows us to provide brutal, unfiltered honesty and tactical advice that universities often cannot or will not share due to internal regulations or bureaucracy."
+    },
+    {
+      q: "How does the 'Early Access' work?",
+      a: "We are currently in a controlled beta phase (Alpha/Beta transition). Joining Early Access puts you in the Inner Circle where you receive first-wave invites to sessions, community access, and prioritized deployment of our 'Shield' services before they open to the general public."
+    },
+    {
+      q: "What makes the 'Shield' services elite?",
+      a: "Our Shield services (Thesis and Internship) are high-intensity, subscription-based programs. They are led by mentors who have already successfully scaled careers into top-tier global companies. Zero failure tolerance means we audit every logic gap and weaponize every asset to ensure outcome success."
+    },
+    {
+      q: "Is my data and privacy protected?",
+      a: "DegreeGate is built with a privacy-first approach. We use encrypted communication channels and do not share student intelligence with academic institutions or third-party advertisers. Your academic journey remains your own."
+    }
+  ];
+
+  return (
+    <section className="py-32 px-6 lg:px-20 bg-[#500683] relative overflow-hidden transition-all duration-700">
+      <div className="max-w-4xl mx-auto space-y-16">
+        <div className="text-center space-y-6">
+          <div className="geometric-badge bg-accent text-white">INTELLIGENCE BRIEFING</div>
+          <h2 className="text-5xl sm:text-7xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-none">Frequently <br /> <span className="text-accent underline underline-offset-8">Asked Questions.</span></h2>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, i) => (
+            <motion.div 
+              key={i}
+              className="border border-slate-100 dark:border-white/10 rounded-[2rem] overflow-hidden transition-all duration-500"
+            >
+              <button 
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                className="w-full flex items-center justify-between p-8 text-left group"
+              >
+                <span className={`text-xl font-black italic uppercase tracking-tight transition-colors ${openIndex === i ? 'text-accent' : 'text-slate-900 dark:text-white'}`}>
+                  {faq.q}
+                </span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${openIndex === i ? 'bg-accent text-white rotate-180' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
+                   <ChevronDown size={18} />
+                </div>
+              </button>
+              <AnimatePresence>
+                {openIndex === i && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-8 pb-8 text-slate-600 dark:text-slate-400 font-medium italic leading-relaxed border-t border-slate-50 dark:border-white/5 pt-6">
+                      {faq.a}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const TacticalLoader: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
@@ -197,7 +277,7 @@ const TacticalLoader: React.FC<{ onComplete: () => void }> = ({ onComplete }) =>
 };
 
 const ProblemSection = () => (
-  <section className="py-32 px-6 lg:px-20 relative overflow-hidden bg-yellow-400 border-y border-black/5 transition-colors duration-500 section-fade-both">
+  <section className="py-32 px-6 lg:px-20 relative overflow-hidden bg-yellow-500 border-y border-black/10 transition-colors duration-700">
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
@@ -207,17 +287,17 @@ const ProblemSection = () => (
       >
         <h2 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black italic uppercase leading-[1.1] max-w-4xl mx-auto text-black flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           <Zap className="text-black fill-current hidden md:block" size={48} />
-          <span className="inline-block text-center px-4">
-            “European universities <span className="text-blue-700">weren’t built</span> with you in mind.”
+          <span className="inline-block text-center px-4 tracking-tighter">
+            “European academic pathways <span className="text-blue-700">weren’t designed</span> for you.”
           </span>
         </h2>
       </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-12">
+      <div className="grid md:grid-cols-3 gap-12 text-center md:text-left">
         {[
-          "One failed subject can cost you an entire year. Retake deadlines, conditional enrollment, scholarship conditions — severe consequences nobody explains upfront.",
-          "Your professors are busy. Your family is far away. Office hours are in a language you’re still learning. Google gives you answers for the wrong country.",
-          "You got the opportunity. The paperwork killed it. Internship offers, scholarships, exchange programs — lost to documentation errors and missed deadlines."
+          "The invisible barriers. One missed regulation in a foreign language can cost you an entire year. Deadlines, scholarship conditions, and enrollment rules that nobody explains properly to international newcomers.",
+          "Extreme isolation. Your professors are distant, and your support network is thousands of miles away. You're navigating a high-stakes migration path with incomplete information and zero safety net.",
+          "The paperwork trap. You earned the opportunity, but the bureaucracy killed it. Lost internships, expired visas, and rejected applications due to minor documentation technicalities."
         ].map((problem, i) => (
           <motion.div 
             key={i}
@@ -225,7 +305,7 @@ const ProblemSection = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.2 }}
-            className="geometric-card !bg-black/90 backdrop-blur-md p-10 space-y-6 hover:scale-105 transition-transform border-none shadow-2xl"
+            className="geometric-card !bg-black/95 backdrop-blur-md p-10 space-y-6 hover:scale-105 transition-transform border-none shadow-2xl flex flex-col items-center md:items-start"
           >
             <div className="text-accent text-5xl font-black italic opacity-40">{i + 1}</div>
             <p className="text-lg md:text-xl font-medium italic leading-relaxed text-white">
@@ -241,8 +321,8 @@ const ProblemSection = () => (
         viewport={{ once: true }}
         className="text-center"
       >
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase text-white drop-shadow-2xl">
-          “DegreeGate was.”
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black italic uppercase text-white drop-shadow-2xl italic tracking-tighter">
+          “DegreeGate changed that.”
         </h2>
       </motion.div>
     </div>
@@ -416,13 +496,13 @@ const Navbar = ({
     };
   }, [isOpen]);
 
-  // Text color logic: Dynamic based on theme or context
-  const navTextColor = scrolled ? "text-slate-900 dark:text-white" : "text-white";
+  // Text color logic: Dynamic based on context
+  const navTextColor = "text-white";
   const navBgColor = isOpen 
-    ? 'bg-white dark:bg-black' 
+    ? 'bg-black'
     : scrolled 
-      ? 'backdrop-blur-xl bg-white/80 dark:bg-black/80' 
-      : 'backdrop-blur-sm bg-black/20';
+      ? 'backdrop-blur-2xl bg-black/80 border-b border-white/10' 
+      : 'bg-transparent';
 
   return (
     <header 
@@ -443,7 +523,7 @@ const Navbar = ({
             </div>
           </div>
           <div className="flex flex-col">
-            <div className={`font-display text-[22px] sm:text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic ${isOpen ? 'text-black dark:text-white' : navTextColor}`}>
+            <div className={`font-display text-[22px] sm:text-[28px] md:text-[34px] leading-none tracking-tighter uppercase italic text-white`}>
               DegreeGate<span className="text-yellow-400">.</span>
             </div>
             <div className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-1 ${isOpen ? 'text-slate-400 dark:text-slate-500' : scrolled ? 'text-slate-400' : 'text-white/50'}`}>Intelligence Gate</div>
@@ -473,7 +553,7 @@ const Navbar = ({
                   transition={{ type: "spring", damping: 20, stiffness: 300 }}
                   className="absolute top-full left-0 pt-4 min-w-[320px] z-[120]"
                 >
-                  <div className="bg-white dark:bg-black p-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] rounded-[2.5rem] border border-slate-100 dark:border-white/10 backdrop-blur-2xl">
+                  <div className="bg-black p-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] rounded-[2.5rem] border border-white/10 backdrop-blur-2xl">
                     <div className="space-y-2">
                     <button 
                       onClick={() => { setPage('thesis-shield'); setShieldsOpen(false); }} 
@@ -483,8 +563,8 @@ const Navbar = ({
                         <GraduationCap size={20} />
                       </div>
                       <div>
-                        <div className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">Thesis Shield</div>
-                        <div className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest mt-1 italic">Academic Armor</div>
+                        <div className="text-sm font-black uppercase tracking-tight text-white">Thesis Shield</div>
+                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 italic">Academic Armor</div>
                       </div>
                     </button>
                     <button 
@@ -495,8 +575,8 @@ const Navbar = ({
                         <Briefcase size={20} />
                       </div>
                       <div>
-                        <div className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">Internship Shield</div>
-                        <div className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-widest mt-1 italic">Career Pipeline</div>
+                        <div className="text-sm font-black uppercase tracking-tight text-white">Internship Shield</div>
+                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 italic">Career Pipeline</div>
                       </div>
                     </button>
                   </div>
@@ -541,16 +621,16 @@ const Navbar = ({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed left-0 right-0 bottom-0 bg-white lg:hidden z-[99998] flex flex-col items-center justify-start overflow-y-auto pt-48 ${
+            className={`fixed left-0 right-0 bottom-0 bg-black lg:hidden z-[99998] flex flex-col items-center justify-start overflow-y-auto pt-48 border-t border-white/10 ${
               scrolled ? 'top-[80px]' : 'top-[100px]'
             }`}
           >
-            <div className="flex flex-col p-10 gap-6 font-black text-slate-900 text-2xl tracking-tighter w-full max-w-sm text-center">
+            <div className="flex flex-col p-10 gap-6 font-black text-white text-2xl tracking-tighter w-full max-w-sm text-center">
               <div className="mb-8 flex flex-col items-center gap-4">
                 <div className="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center rotate-12 shadow-2xl shadow-yellow-400/20">
                    <GraduationCap size={36} className="text-black" />
                 </div>
-                <div className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.8em]">Tactical Interface</div>
+                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.8em]">Inner Circle Interface</div>
               </div>
 
               <motion.button 
@@ -558,68 +638,49 @@ const Navbar = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 onClick={() => { setPage('home'); setIsOpen(false); }} 
-                className="text-center py-5 border-y border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight group"
+                className="text-center py-5 border-y border-white/5 italic hover:text-yellow-400 transition-all uppercase tracking-tight group"
               >
                 <span className="group-hover:translate-x-2 transition-transform inline-block">Base Hub</span>
               </motion.button>
               
-              <motion.div 
+              <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="space-y-4 py-4"
+                onClick={() => { setPage('thesis-shield'); setIsOpen(false); }} 
+                className="text-center py-5 border-b border-white/5 italic hover:text-yellow-400 transition-all uppercase tracking-tight group"
               >
-                <span className="text-[10px] text-slate-400 uppercase tracking-widest block font-black mb-6 opacity-60">Strategic Shields</span>
-                <div className="grid grid-cols-1 gap-4 px-4">
-                  <button onClick={() => { setPage('thesis-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
-                    <GraduationCap size={20} className="text-yellow-600 group-hover:text-black" /> 
-                    Thesis Shield
-                  </button>
-                  <button onClick={() => { setPage('internship-shield'); setIsOpen(false); }} className="px-6 py-5 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center gap-4 italic uppercase text-xs font-black tracking-widest hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all group scale-100 active:scale-95 shadow-md">
-                    <Briefcase size={20} className="text-yellow-600 group-hover:text-black" /> 
-                    Internship Shield
-                  </button>
-                </div>
-              </motion.div>
+                <span className="group-hover:translate-x-2 transition-transform inline-block">Thesis Shield</span>
+              </motion.button>
 
               <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                onClick={() => { setPage('subject-catalog'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
+                onClick={() => { setPage('internship-shield'); setIsOpen(false); }} 
+                className="text-center py-5 border-b border-white/5 italic hover:text-yellow-400 transition-all uppercase tracking-tight group"
               >
-                Subject Inventory
+                <span className="group-hover:translate-x-2 transition-transform inline-block">Internship Shield</span>
               </motion.button>
-              
+
               <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                onClick={() => { setPage('expert-advice'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
+                onClick={() => { setPage('degree-gateway'); setIsOpen(false); }} 
+                className="text-center py-5 border-b border-white/5 italic hover:text-yellow-400 transition-all uppercase tracking-tight group"
               >
-                Expert Intel
+                <span className="group-hover:translate-x-2 transition-transform inline-block">The Gateway</span>
               </motion.button>
 
               <motion.button 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                onClick={() => { setPage('degree-gateway'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
+                onClick={() => { setPage('about'); setIsOpen(false); }} 
+                className="text-center py-5 border-b border-white/5 italic hover:text-yellow-400 transition-all uppercase tracking-tight group"
               >
-                The Gateway
-              </motion.button>
-              
-              <motion.button 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55 }}
-                onClick={() => { setPage('blog'); setIsOpen(false); }} 
-                className="text-center py-5 border-b border-slate-100 italic hover:text-yellow-600 transition-all uppercase tracking-tight"
-              >
-                Intelligence Blog
+                <span className="group-hover:translate-x-2 transition-transform inline-block">Our Story</span>
               </motion.button>
 
               <motion.button 
@@ -627,9 +688,9 @@ const Navbar = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
                 onClick={() => { setPage('contact'); setIsOpen(false); }} 
-                className="geometric-button-primary w-full mt-10 !py-8 text-center !rounded-full bg-black !text-white border-none shadow-2xl italic uppercase text-xl font-black hover:bg-yellow-400 hover:!text-black transition-all"
+                className="bg-black text-white py-6 rounded-2xl mt-4 uppercase tracking-[0.2em] italic font-black shadow-2xl"
               >
-                Open Channel
+                Connect Now
               </motion.button>
             </div>
           </motion.div>
@@ -639,13 +700,97 @@ const Navbar = ({
   );
 };
 
+const ValueLadder = () => {
+  return (
+    <section className="py-32 px-6 lg:px-20 relative min-h-screen flex items-center overflow-hidden bg-black text-white">
+      {/* Background with overlay */}
+      <div className="absolute inset-0 z-0">
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline 
+          className="w-full h-full object-cover opacity-40 grayscale"
+        >
+          <source src="https://degreegate.pl/wp-content/uploads/2026/04/caed-2.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,transparent_0%,black_100%)] opacity-60 z-10" />
+      </div>
+
+      <div className="max-w-7xl mx-auto w-full relative z-20 grid lg:grid-cols-2 gap-20">
+        <div className="space-y-12">
+          <div className="space-y-4">
+            <motion.h2 
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="text-6xl sm:text-8xl md:text-9xl font-black italic uppercase leading-[0.8] tracking-tighter"
+            >
+              <span className="text-white opacity-20 block translate-x-[-0.05em]" style={{ WebkitTextStroke: '2px white' }}>THE VALUE</span>
+              <span className="text-[#a855f7] block drop-shadow-[0_0_30px_rgba(168,85,247,0.4)]">LADDER</span>
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-xl md:text-2xl font-bold italic text-white/80 max-w-xl leading-relaxed"
+            >
+              We take you from total confusion to boardroom excellence. Every step is a strategic advancement.
+            </motion.p>
+          </div>
+
+          <div className="space-y-8 relative">
+            {/* The vertical divider line */}
+            <div className="absolute left-6 top-8 bottom-8 w-px bg-white/10" />
+
+            {[
+              { id: '01', title: 'GATEWAY HUB', desc: 'INTELLIGENCE & COMMUNITY', price: 'Free' },
+              { id: '02', title: 'SUBJECT RESCUE', desc: 'MODULE CORRECTION OPS', price: 'PLN 89' },
+              { id: '03', title: 'EXPERT INTEL', desc: '30M STRATEGIC SESSION', price: 'PLN 21' },
+              { id: '04', title: 'SHIELD OPS', desc: 'FULL MILESTONE ARMOR', price: 'Elite' },
+            ].map((step, i) => (
+              <motion.div 
+                key={step.id}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="flex items-center justify-between group cursor-pointer"
+              >
+                <div className="flex items-center gap-8">
+                  <div className="text-4xl md:text-6xl font-black italic text-white/5 group-hover:text-[#a855f7] transition-colors duration-500 shrink-0">
+                    {step.id}
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter text-white group-hover:translate-x-2 transition-transform duration-500">
+                      {step.title}
+                    </h4>
+                    <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/40 italic">
+                      {step.desc}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-xl md:text-3xl font-black italic text-[#a855f7] group-hover:scale-110 transition-transform duration-500 underline decoration-white/10 underline-offset-8">
+                  {step.price}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // --- View Components ---
 
 const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) => void, formatPrice: (b: number) => string }) => {
   return (
     <div className="flex flex-col bg-transparent w-full overflow-x-hidden pt-0">
-      {/* Section 0: Hero Section - The "Creators" Layout */}
-      <section className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-6 lg:px-20 overflow-hidden pt-[140px] pb-32 section-fade-bottom">
+      {/* Section 0: Hero Section */}
+      <section className="relative min-h-[90vh] lg:min-h-screen w-full flex flex-col items-center justify-center text-center px-6 lg:px-20 overflow-hidden pt-[180px] pb-32">
         {/* Video Background */}
         <div className="absolute inset-0 z-0">
           <video
@@ -653,39 +798,70 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
             loop
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover brightness-75"
           >
             <source src="https://degreegate.pl/wp-content/uploads/2026/04/makn.mp4" type="video/mp4" />
           </video>
           {/* Bottom Gradient Fade Overlay */}
-          <div className="absolute inset-0 z-[1] pointer-events-none bg-[linear-gradient(to_bottom,transparent_60%,rgba(0,0,0,0.7)_100%)]" />
+          <div className="absolute inset-0 z-[1] pointer-events-none bg-[linear-gradient(to_bottom,transparent_40%,rgba(0,0,0,0.8)_100%)]" />
+          {/* Subtle Grid Overlay */}
+          <div className="absolute inset-0 z-[1] opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
         </div>
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-5xl mx-auto space-y-12 relative z-10"
+          className="max-w-6xl mx-auto space-y-12 relative z-10"
         >
-          <div className="space-y-8">
-            <h1 className="text-5xl sm:text-6xl md:text-8xl font-display font-black leading-tight text-white tracking-tight drop-shadow-2xl">
-              WE PROTECT <br />
-              <span className="text-white underline underline-offset-8 decoration-white/20">CAREERS</span>, <br />
-              NOT JUST <span className="text-white border-b-8 border-yellow-400">DEGREES</span>
+          <div className="space-y-10">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-yellow-400 text-black font-black text-[10px] uppercase tracking-[0.3em] italic shadow-2xl"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+              </span>
+              Early Access Platform for International Students
+            </motion.div>
+
+            <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black leading-tight sm:leading-[0.95] text-white tracking-tighter drop-shadow-2xl uppercase italic break-words">
+              DegreeGate: The <span className="text-yellow-400">Intelligence Gateway</span> for your Degree, Thesis, and Shield Protection.
             </h1>
             
-            <p className="text-white text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed drop-shadow-2xl italic">
-              From first modules to final defense — we help you build your academic infrastructure and scale into global industries.
+            <p className="text-white/80 text-xl md:text-2xl font-medium max-w-3xl mx-auto leading-relaxed drop-shadow-2xl italic font-sans">
+              Navigate European higher education with precision. Access subject experts in tech and business, secure your thesis shield, and master the academic gateway.
             </p>
           </div>
           
-          <div className="pt-10">
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
             <button 
-              onClick={() => setPage('contact')}
-              className="geometric-button-cta shadow-[0_25px_60px_rgba(255,69,0,0.5)] scale-110 md:scale-125"
+              onClick={() => setPage('degree-gateway')}
+              className="geometric-button-cta !py-7 !px-12 !rounded-full shadow-[0_25px_60px_rgba(255,69,0,0.4)] hover:shadow-[0_30px_70px_rgba(255,69,0,0.6)] !text-base"
             >
-              START PROTECTING
+              ACCESS INTELLIGENCE GATEWAY <ArrowRight className="ml-3" size={20} />
             </button>
+            <button 
+              onClick={() => setPage('about')}
+              className="px-10 py-6 border-2 border-white/20 backdrop-blur-md rounded-full text-white font-black text-sm uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+            >
+              LEARN OUR STORY
+            </button>
+          </div>
+
+          <div className="pt-16 flex flex-wrap justify-center gap-x-12 gap-y-6 opacity-60">
+            <div className="flex items-center gap-3 text-white text-[10px] font-black uppercase tracking-[0.2em]">
+              <Check className="text-yellow-400" size={16} /> Built for international students
+            </div>
+            <div className="flex items-center gap-3 text-white text-[10px] font-black uppercase tracking-[0.2em]">
+              <Globe className="text-yellow-400" size={16} /> EU-focused platform
+            </div>
+            <div className="flex items-center gap-3 text-white text-[10px] font-black uppercase tracking-[0.2em]">
+              <Lock className="text-yellow-400" size={16} /> Privacy-first approach
+            </div>
           </div>
         </motion.div>
       </section>
@@ -693,18 +869,73 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
       {/* Section 1: Problem Section */}
       <ProblemSection />
 
-      {/* Section 2: Product Suite (Previously Section 1, reordered to appear after Problem Section) */}
-      <section className="bg-purple-600 text-slate-900 py-32 px-6 lg:px-20 overflow-hidden relative border-b border-black/5 transition-colors duration-500 section-fade-both">
+      {/* Section 2: Solution Section */}
+      <section className="py-24 sm:py-32 px-6 lg:px-20 relative overflow-hidden bg-[#9c183a] text-white">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          <div className="space-y-10 sm:space-y-12">
+            <div className="space-y-6">
+              <div className="geometric-badge bg-yellow-400 text-black">The Solution</div>
+              <h2 className="text-4xl sm:text-6xl md:text-8xl font-black leading-tight sm:leading-none italic uppercase tracking-tighter">Your Academic <br /><span className="text-yellow-400 underline underline-offset-8 text-4xl sm:text-6xl md:text-[61px] font-bold font-['Courier_New']">Infrastructure.</span></h2>
+              <p className="text-lg sm:text-xl text-white/70 font-medium italic leading-relaxed max-w-xl">
+                We don't just provide information; we build the support systems that ensure you don't just survive European academia—you master it.
+              </p>
+            </div>
+            <div className="space-y-8">
+              {[
+                { t: "Automated Gateway", d: "Dynamic route mapping through your specific university's regulations and deadlines.", i: <Zap className="text-yellow-400" /> },
+                { t: "Expert In Tech & Business", d: "Direct access to experts in tech and business who have already successfully navigated the path you're on.", i: <ShieldCheck className="text-yellow-400" /> },
+                { t: "Career Intel", d: "Strategic intelligence and positioning of your academic choices to maximize global employment value.", i: <Briefcase className="text-yellow-400" /> }
+              ].map((item, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="flex gap-8 group"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-yellow-400 transition-colors duration-500">
+                    {item.i}
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-yellow-400 transition-colors">{item.t}</h4>
+                    <p className="text-white/50 text-sm font-medium italic">{item.d}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          <div className="relative group">
+            <div className="absolute -inset-8 bg-yellow-400/10 rounded-[4rem] rotate-3 blur-3xl" />
+            <div className="relative geometric-card !bg-white/5 border-white/10 p-2 overflow-hidden aspect-[4/5]">
+               <ShieldVideoBackground 
+                 src="https://degreegate.pl/wp-content/uploads/2026/04/ggg.mp4"
+                 thumbnail="https://picsum.photos/seed/solution-vid/800/1000"
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent flex flex-col justify-end p-12">
+                 <div className="text-[10px] font-black text-yellow-400 uppercase tracking-widest mb-4">Deployment Status: READY</div>
+                 <h3 className="text-4xl text-white italic font-black uppercase tracking-tighter">Gateway Active</h3>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Ladder Section */}
+      <ValueLadder />
+
+      {/* Section 3: Features (Elite Shields) */}
+      <section className="bg-[#5b21b6] text-white py-32 px-6 lg:px-20 overflow-hidden relative border-b border-white/5 transition-colors duration-700">
         <div className="absolute inset-0 opacity-20 dark:opacity-5 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         
         <div className="max-w-7xl mx-auto w-full space-y-20 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end gap-12 border-b border-black/10 dark:border-white/10 pb-16">
             <div className="space-y-6">
-              <div className="geometric-badge bg-black dark:bg-accent text-white">Operational Units</div>
-              <h2 className="text-6xl sm:text-7xl md:text-8xl font-black leading-none text-slate-900 dark:text-white italic">Elite <br /> <span className="text-[#ededed] underline">Shields</span></h2>
+              <div className="geometric-badge bg-black dark:bg-accent text-white italic tracking-[0.5em]">FEATURES</div>
+              <h2 className="text-4xl sm:text-7xl md:text-8xl font-black leading-none text-slate-900 dark:text-white italic tracking-tighter">Strategic <br /> <span className="text-[#ededed] underline decoration-yellow-400">Assets.</span></h2>
             </div>
             <p className="max-w-md text-white font-bold text-lg italic border-l-4 border-white pl-6 py-2">
-              Subscription-based bodyguards for your academic and career milestones. Zero failure tolerance.
+              Bespoke academic and professional armor. Zero failure tolerance for international careers.
             </p>
           </div>
 
@@ -715,7 +946,7 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
                 title: 'Thesis Shield', 
                 price: formatPrice(131.5),
                 video: 'https://degreegate.pl/wp-content/uploads/2026/04/mmkcard.mov',
-                desc: 'Total milestone security for your final dissertation.',
+                desc: 'Total milestone security for your final dissertation dissertation.',
                 img: 'https://picsum.photos/seed/thesis-tactical/800/600',
                 feats: ['Logic Audit', 'Source Scrape', 'Defense Drill']
               },
@@ -740,7 +971,6 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
                         src={s.video} 
                         thumbnail={s.img}
                       />
-                      {/* Sub-scrolling cinematic gradient shimmer */}
                       <div className="absolute inset-0 z-[1] bg-gradient-to-tr from-accent/20 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                     </>
                   )}
@@ -789,101 +1019,99 @@ const HomeView = ({ setPage, formatPrice }: { setPage: (p: PageId, id?: string) 
         </div>
       </section>
 
-      {/* Section 4 (Now 6): Expert Intel Callout */}
-      <section className="py-20 bg-yellow-400 px-6 lg:px-20 border-b border-black/5 section-fade-both">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-          <div className="relative group">
-             <div className="absolute -inset-4 bg-black/10 rounded-[4rem] rotate-3 blur-2xl group-hover:rotate-6 transition-transform" />
-             <img 
-               src="https://degreegate.pl/wp-content/uploads/2026/04/img_4502.jpg" 
-               className="relative rounded-[3rem] w-full aspect-[4/5] object-cover bg-black shadow-2xl border-[10px] border-black"
-               referrerPolicy="no-referrer"
-               alt="Expert Advice"
-             />
-             <div className="absolute top-10 right-10 w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-black text-black animate-bounce shadow-2xl z-20">
-               <Zap size={40} className="fill-black" />
-             </div>
+      {/* Section 4: Early Access CTA */}
+      <section className="py-32 px-6 lg:px-20 bg-yellow-400 relative overflow-hidden flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="max-w-4xl w-full text-center space-y-12 relative z-10"
+        >
+          <div className="space-y-6">
+            <div className="geometric-badge bg-black text-white">LIMITED ENROLLMENT</div>
+            <h2 className="text-4xl sm:text-7xl font-black italic uppercase leading-none text-black tracking-tighter">Your Future in Europe <br /> <span className="text-blue-700 underline underline-offset-8">Starts Here.</span></h2>
+            <p className="text-xl text-black font-black italic max-w-2xl mx-auto">
+              Join the DegreeGate beta and get early access to our full suite of academic and career armor. Currently in Beta. 
+            </p>
           </div>
-          <div className="space-y-12">
-            <div className="space-y-6">
-               <div className="geometric-badge bg-black text-white">Expert Advice</div>
-               <h2 className="text-6xl md:text-8xl font-black italic uppercase leading-none text-black drop-shadow-none">Brutal <br /> <span className="text-white underline">Honesty.</span></h2>
-               <p className="text-xl text-black font-black italic leading-relaxed drop-shadow-none">30 minutes of direct intelligence from professionals working in the heart of Europe. No fluff, just results.</p>
-            </div>
-            <button onClick={() => setPage('expert-advice')} className="geometric-button-primary w-full !py-8 text-xl italic uppercase tracking-widest !rounded-3xl shadow-xl shadow-black/20 bg-black text-white border-black hover:bg-black/90">Get Direct Intel</button>
-          </div>
-        </div>
+          <button 
+            onClick={() => setPage('degree-gateway')}
+            className="geometric-button-cta !bg-black !text-white !py-6 sm:!py-8 !px-8 sm:!px-16 !text-lg sm:!text-xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all mx-auto flex items-center justify-center text-center"
+          >
+            <span className="flex items-center justify-center flex-wrap gap-3">
+              START YOUR APPLICATION JOURNEY 
+              <Zap className="fill-yellow-400 text-yellow-400 shrink-0" size={24} />
+            </span>
+          </button>
+        </motion.div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10 text-[10rem] font-black text-black/[0.05] italic uppercase select-none pointer-events-none">BETA</div>
+        <div className="absolute bottom-10 right-10 text-[10rem] font-black text-black/[0.05] italic uppercase select-none pointer-events-none">EARLY</div>
       </section>
 
-      {/* Section 3 (Now 5): Intelligence Stats */}
-      <section className="pt-[55px] pb-16 bg-purple-600 text-black overflow-hidden relative border-b border-black/5">
+      {/* Section 5: Intelligence Stats */}
+      <section className="py-24 bg-black text-white overflow-hidden relative border-y border-white/10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
           {[
-            { l: 'System Status', v: 'ACTIVE', s: 'text-[52px]' },
-            { l: 'Successful Defenses', v: '100%', s: 'text-4xl sm:text-5xl lg:text-6xl' },
-            { l: 'Strategic Reach', v: 'GLOBAL', s: 'text-[52px]' },
-            { l: 'Operational Phase', v: 'ALPHA', s: 'text-[57px]' }
+            { l: 'System Status', v: 'ACTIVE', s: 'text-4xl sm:text-5xl lg:text-[52px]' },
+            { l: 'Successful Defenses', v: '100%', s: 'text-4xl sm:text-5xl lg:text-6xl text-yellow-400' },
+            { l: 'Strategic Reach', v: 'GLOBAL', s: 'text-4xl sm:text-5xl lg:text-[52px]' },
+            { l: 'Operational Phase', v: 'BETA', s: 'text-4xl sm:text-5xl lg:text-[57px] text-yellow-400' }
           ].map((stat, i) => (
-            <div key={i} className="text-center space-y-2">
-              <div className={`${stat.s} font-display font-black italic leading-none text-black break-words uppercase`}>{stat.v}</div>
-              <div className="text-[10px] font-black uppercase tracking-[0.3em] text-black/60">{stat.l}</div>
+            <div key={i} className="text-center space-y-2 border-x border-white/5">
+              <div className={`${stat.s} font-display font-black italic leading-none break-words uppercase`}>{stat.v}</div>
+              <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{stat.l}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Section 3: Strategy Hub / Ladder */}
-      <section className="py-24 px-6 lg:px-20 relative overflow-hidden border-b border-white/5 min-h-[750px] flex items-center section-fade-top">
-        {/* Full Section Background Video */}
-        <ShieldVideoBackground 
-          src="https://degreegate.pl/wp-content/uploads/2026/04/5.mp4" 
-          thumbnail="https://picsum.photos/seed/strategy-ladder/1920/1080"
-          className="opacity-90"
-        />
-          
-          {/* Tactical Edge-Only Premium Vignette */}
-          <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,black,transparent_15%,transparent_85%,black)]" />
-          <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,black,transparent_15%,transparent_85%,black)]" />
-        
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/[0.03] font-black text-[30vw] leading-none pointer-events-none uppercase italic select-none z-[1]">
-          Ladder
-        </div>
-        
-        <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-20 items-center relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-12"
-          >
-            <div className="space-y-6">
-              <div className="geometric-badge bg-accent">Strategy Hub</div>
-              <h2 className="text-6xl sm:text-8xl leading-none italic uppercase text-white drop-shadow-2xl">The Value <br /><span className="text-accent underline decoration-4">Ladder</span></h2>
-              <p className="text-xl text-white font-medium max-w-lg italic drop-shadow-xl">We take you from total confusion to boardroom excellence. Every step is a strategic advancement.</p>
-            </div>
+      {/* Section 6: FAQSection */}
+      <FAQSection />
 
+      {/* Section 7: Final Contact Hook */}
+      <section className="py-24 sm:py-32 px-6 lg:px-20 bg-[#6d28d9] relative overflow-hidden">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-20 items-center relative z-10">
+          <div className="space-y-10 flex flex-col items-center lg:items-start">
+            <div className="space-y-6 text-center lg:text-left">
+              <div className="geometric-badge bg-black text-white">OPEN CHANNEL</div>
+              <h2 className="text-4xl sm:text-7xl md:text-[77px] font-black italic uppercase tracking-tighter text-white leading-tight text-center italic">Direct <br /> Intelligence.</h2>
+              <p className="text-lg sm:text-xl text-white font-black italic max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                Got a specific tactical challenge? Our mentors are ready for brief, high-impact intelligence sessions.
+              </p>
+            </div>
+            <button 
+              onClick={() => setPage('contact')}
+              className="geometric-button-primary !bg-white !text-purple-600 !py-6 !px-12 !text-lg shadow-2xl border-none hover:bg-yellow-400 hover:!text-black transition-all"
+            >
+              NEGOTIATE ACCESS
+            </button>
+          </div>
+          <motion.div 
+            whileHover={{ scale: 1.05, rotate: -2 }}
+            className="relative geometric-card !bg-black/80 border-white/20 p-10 space-y-10 shadow-3xl"
+          >
+            <div className="text-xs font-black text-yellow-400 uppercase tracking-[0.5em] italic">COMMUNICATION_LOG</div>
             <div className="space-y-6">
-              {[
-                { n: '01', t: 'Gateway Hub', d: 'Intelligence & Community', p: 'Free' },
-                { n: '02', t: 'Subject Rescue', d: 'Module Correction Ops', p: formatPrice(21) },
-                { n: '03', t: 'Expert Intel', d: '30m Strategic Session', p: formatPrice(5) },
-                { n: '04', t: 'Shield Ops', d: 'Full Milestone Armor', p: 'Elite' }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-8 group cursor-pointer">
-                  <div className="text-5xl font-black text-accent/20 group-hover:text-accent transition-colors italic leading-none">{item.n}</div>
-                  <div className="flex-grow border-b border-white/10 pb-6 flex justify-between items-end">
-                    <div>
-                      <div className="text-2xl font-black uppercase text-white group-hover:translate-x-2 transition-transform italic tracking-tighter">{item.t}</div>
-                      <div className="text-[10px] font-black text-white/50 uppercase tracking-widest mt-1">{item.d}</div>
-                    </div>
-                    <div className="text-sm font-black text-accent italic">{item.p}</div>
-                  </div>
-                </div>
-              ))}
+               <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded bg-yellow-400 flex items-center justify-center text-black shrink-0 font-black text-[10px]">S1</div>
+                  <div className="text-white/60 text-sm font-medium italic">"I'm confused about ECTS transfer protocols across Europe."</div>
+               </div>
+               <div className="flex gap-4 items-start justify-end">
+                  <div className="text-yellow-400/80 text-sm font-black italic text-right">"Sector clear. Tactical session available tomorrow."</div>
+                  <div className="w-8 h-8 rounded bg-white/20 flex items-center justify-center text-white shrink-0 font-black text-[10px]">DG</div>
+               </div>
+               <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded bg-yellow-400 flex items-center justify-center text-black shrink-0 font-black text-[10px]">S2</div>
+                  <div className="text-white/60 text-sm font-medium italic">"Is my CV competitive for Berlin's fintech sector?"</div>
+               </div>
+            </div>
+            <div className="pt-6 border-t border-white/10 flex justify-between items-center">
+               <div className="text-[10px] font-black text-white/20 uppercase tracking-widest italic animate-pulse">Awaiting Signal...</div>
+               <Globe className="text-white/10" size={24} />
             </div>
           </motion.div>
-
-          <div className="hidden lg:block h-[600px]" /> {/* Spacer to maintain the layout and let background show through */}
         </div>
       </section>
     </div>
@@ -1041,11 +1269,11 @@ const InternshipShieldView = ({ setPage, formatPrice }: { setPage: (p: PageId) =
 );
 
 const CatalogView = ({ setPage }: { setPage: (p: PageId, id?: string) => void }) => (
-  <div className="bg-purple-600 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen transition-colors duration-500 section-fade-bottom">
+  <div className="bg-[#4c1d95] pt-[160px] pb-20 px-6 lg:px-20 min-h-screen transition-colors duration-700">
     <div className="max-w-7xl mx-auto space-y-24">
       <div className="space-y-8 max-w-4xl">
         <div className="geometric-badge bg-black dark:bg-white text-white dark:text-slate-900">Deployment Ready</div>
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] leading-[0.8] italic uppercase text-white drop-shadow-none">Subject <br /><span className="text-white underline decoration-accent">Catalog.</span></h1>
+        <h1 className="text-4xl sm:text-7xl md:text-8xl lg:text-[7rem] leading-tight sm:leading-[0.8] italic uppercase text-white drop-shadow-none">Subject <br /><span className="text-white underline decoration-accent">Catalog.</span></h1>
         <p className="text-xl text-white font-black italic underline decoration-white/30 drop-shadow-none">Module-specific rescue operations. Don't let one technical failure jeopardize your entire degree.</p>
       </div>
 
@@ -1213,7 +1441,7 @@ const ExpertAdviceView = ({ setPage, formatPrice }: { setPage: (p: PageId) => vo
     <div className="max-w-7xl mx-auto space-y-24 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
         <div className="geometric-badge mx-auto bg-black dark:bg-accent text-white">Direct Intel Channel</div>
-        <h1 className="text-6xl sm:text-7xl md:text-9xl leading-[0.8] italic uppercase text-slate-900 dark:text-white tracking-tighter drop-shadow-none">Expert <br /><span className="text-slate-950 dark:text-accent underline decoration-4 underline-offset-[12px]">Advice.</span></h1>
+        <h1 className="text-4xl sm:text-7xl md:text-9xl leading-tight sm:leading-[0.8] italic uppercase text-slate-900 dark:text-white tracking-tighter drop-shadow-none">Expert <br /><span className="text-slate-950 dark:text-accent underline decoration-4 underline-offset-8 sm:underline-offset-[12px]">Advice.</span></h1>
         <p className="text-xl text-slate-950 dark:text-slate-400 font-black italic underline decoration-white/30 leading-relaxed drop-shadow-none">30 minutes of brutal, strategic honesty. The information the university doesn't want you to have.</p>
       </div>
 
@@ -1298,21 +1526,18 @@ const DegreeGatewayView = ({ setPage }: { setPage: (p: PageId) => void }) => {
     e.preventDefault();
     setStatus('loading');
     try {
-      const response = await fetch('/api/gateway-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      await addDoc(collection(db, 'submissions'), {
+        form_name: 'degree-gateway',
+        data: formData,
+        status: 'unread',
+        createdAt: serverTimestamp()
       });
-      const data = await response.json();
-      if (response.ok) {
-        setStatus('success');
-        setMessage(data.message);
-      } else {
-        throw new Error(data.error || 'Failed to request access.');
-      }
+      setStatus('success');
+      setMessage('YOUR ACCESS REQUEST HAS BEEN BROADCAST. STAND BY FOR INTEL.');
     } catch (err: any) {
+      console.error("Gateway signup error:", err);
       setStatus('error');
-      setMessage(err.message);
+      setMessage('COMMUNICATION LINK FAILURE: SIG-99');
     }
   };
 
@@ -1330,7 +1555,7 @@ const DegreeGatewayView = ({ setPage }: { setPage: (p: PageId) => void }) => {
   ];
 
   return (
-    <div className="bg-yellow-400 pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen transition-colors duration-500 section-fade-bottom">
+    <div className="bg-yellow-500 pt-[100px] sm:pt-[140px] pb-20 sm:pb-32 px-4 sm:px-6 lg:px-20 min-h-screen transition-colors duration-700">
       <div className="max-w-7xl mx-auto space-y-16 sm:space-y-32">
         {/* Hero Section */}
         <div className="text-center space-y-4 sm:space-y-8 max-w-4xl mx-auto">
@@ -1344,7 +1569,7 @@ const DegreeGatewayView = ({ setPage }: { setPage: (p: PageId) => void }) => {
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-white leading-[0.95] sm:leading-[0.85]"
+            className="text-3xl sm:text-5xl md:text-7xl lg:text-9xl font-black italic uppercase tracking-tighter text-white leading-tight sm:leading-[0.85]"
           >
             Your Access to the <br /> <span className="text-white underline decoration-accent decoration-4 lg:decoration-8 underline-offset-4 lg:underline-offset-8">DegreeGate Inner Circle.</span>
           </motion.h1>
@@ -1517,14 +1742,14 @@ const DegreeGatewayView = ({ setPage }: { setPage: (p: PageId) => void }) => {
 };
 
 const AboutView = ({ setPage }: { setPage: (p: PageId) => void }) => (
-  <div className="bg-yellow-400 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500 section-fade-bottom">
+  <div className="bg-yellow-500 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-700">
     <div className="absolute top-0 right-0 w-[80vw] lg:w-[40vw] h-full bg-black/5 dark:bg-white/5 border-l border-black/5 z-0 backdrop-blur-sm" />
     <div className="max-w-7xl mx-auto space-y-32 relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-center">
         <div className="space-y-12">
           <div className="space-y-8">
             <div className="geometric-badge bg-black dark:bg-accent text-white">Operational History</div>
-            <h1 className="text-6xl sm:text-7xl md:text-[108px] leading-[0.7] italic uppercase tracking-tighter text-white drop-shadow-none">The <br /><span className="text-white underline decoration-accent decoration-8 text-[99px]">DegreeGate</span><br /> Narrative.</h1>
+            <h1 className="text-4xl sm:text-7xl md:text-[108px] leading-tight sm:leading-[0.7] italic uppercase tracking-tighter text-white drop-shadow-none">The <br /><span className="text-white underline decoration-accent decoration-4 sm:decoration-8 text-[40px] sm:text-[99px]">DegreeGate</span><br /> Narrative.</h1>
             <p className="text-xl md:text-2xl italic font-black max-w-lg border-l-[12px] border-white pl-10 text-white drop-shadow-none">We didn't start as a business. We started as students who realized the system was built to be broken, and then we mastered the cracks.</p>
           </div>
           <div className="space-y-8 text-white text-sm leading-relaxed font-black max-w-xl italic">
@@ -1577,24 +1802,21 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
     setStatus('loading');
     
     const formData = new FormData(e.currentTarget);
-    const data = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-      data.append(key, value.toString());
-    }
+    const formPayload: Record<string, any> = {};
+    formData.forEach((value, key) => {
+      formPayload[key] = value;
+    });
 
     try {
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: data.toString(),
+      await addDoc(collection(db, 'submissions'), {
+        form_name: (formData.get('form-name') || 'contact').toString(),
+        data: formPayload,
+        status: 'unread',
+        createdAt: serverTimestamp()
       });
-
-      if (response.ok) {
-        setStatus('success');
-      } else {
-        setStatus('error');
-      }
+      setStatus('success');
     } catch (error) {
+      console.error("Submission error:", error);
       setStatus('error');
     }
   };
@@ -1619,7 +1841,7 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
   }
 
   return (
-  <div className="bg-purple-600 pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500 section-fade-bottom">
+  <div className="bg-[#4c1d95] pt-[160px] pb-20 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-700">
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.02),transparent)]" />
     <div className="max-w-7xl mx-auto relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 lg:gap-32">
@@ -1737,11 +1959,11 @@ const ContactView = ({ setPage }: { setPage: (p: PageId) => void }) => {
 
 
 const BlogView = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => (
-  <div className="bg-yellow-400 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-500 section-fade-bottom">
+  <div className="bg-yellow-500 pt-[160px] pb-32 px-6 lg:px-20 min-h-screen relative overflow-hidden transition-colors duration-700">
     <div className="max-w-7xl mx-auto space-y-20 relative z-10">
       <div className="text-center space-y-8 max-w-4xl mx-auto">
         <div className="geometric-badge mx-auto bg-black dark:bg-accent text-white">Intelligence Pipeline</div>
-        <h1 className="text-6xl md:text-8xl font-black italic uppercase text-white tracking-tighter">Strategic <br /><span className="text-white underline decoration-accent">Intel.</span></h1>
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black italic uppercase text-white tracking-tighter leading-tight sm:leading-none">Strategic <br /><span className="text-white underline decoration-accent">Intel.</span></h1>
         <p className="text-xl text-white font-bold italic border-x border-white/20 px-10">Operational briefings, system updates, and academic extraction tactics.</p>
       </div>
 
@@ -1852,12 +2074,15 @@ const TermsView = () => (
 );
 
 const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageId, id?: string) => void }) => {
+  const [activeTab, setActiveTab] = useState<'posts' | 'submissions'>('posts');
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [sessionToken, setSessionToken] = useState<string | null>(localStorage.getItem('dg_admin_token'));
   const [password, setPassword] = useState('');
   const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem('dg_admin_token'));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [newPost, setNewPost] = useState<Partial<BlogPost>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -1872,6 +2097,18 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
       setIsAdmin(true);
     }
   }, []);
+
+  // Submissions listener
+  useEffect(() => {
+    if (isAdmin) {
+      const q = query(collection(db, 'submissions'), orderBy('createdAt', 'desc'));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const subs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
+        setSubmissions(subs);
+      });
+      return () => unsubscribe();
+    }
+  }, [isAdmin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1900,11 +2137,11 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
         setIsAdmin(true);
         setPassword('');
       } else {
-        setError(data.error || 'ACCESS DENIED.');
+        setError(data.error || 'REJECTED. Authentication signal mismatch.');
       }
     } catch (e) {
       console.error('Auth Signal Failure:', e);
-      setError('Communication link severed. Check server status.');
+      setError('REJECTED. Communication link severed.');
     } finally {
       setLoading(false);
     }
@@ -1921,18 +2158,26 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
     e.preventDefault();
     setLoading(true);
     try {
-      const slug = newPost.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'briefing-' + Date.now();
-      await addDoc(collection(db, 'blog_posts'), {
-        ...newPost,
-        slug,
-        authorId: 'admin',
-        createdAt: Timestamp.now()
-      });
+      if (editingPost) {
+        await updateDoc(doc(db, 'blog_posts', editingPost.id!), {
+          ...newPost,
+          updatedAt: serverTimestamp()
+        });
+        setEditingPost(null);
+      } else {
+        const slug = newPost.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'briefing-' + Date.now();
+        await addDoc(collection(db, 'blog_posts'), {
+          ...newPost,
+          slug,
+          authorId: 'admin',
+          createdAt: serverTimestamp()
+        });
+      }
       setIsCreating(false);
       setNewPost({ title: '', date: new Date().toISOString().split('T')[0], featured_image: '', description: '', body: '' });
     } catch (e) {
-      console.error('Extraction Failure:', e);
-      alert('SIGNAL COLLISION: Could not deploy intelligence.');
+      console.error('Operation Failure:', e);
+      alert('SIGNAL COLLISION: Operation failed.');
     } finally {
       setLoading(false);
     }
@@ -1944,6 +2189,23 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
       await deleteDoc(doc(db, 'blog_posts', id));
     } catch (e) {
       console.error('Deletion Failure:', e);
+    }
+  };
+
+  const handleDeleteSubmission = async (id: string) => {
+    if (!confirm('ERASE SUBMISSION: Are you sure?')) return;
+    try {
+      await deleteDoc(doc(db, 'submissions', id));
+    } catch (e) {
+      console.error('Submission Deletion Failure:', e);
+    }
+  };
+
+  const handleUpdateSubmissionStatus = async (id: string, status: Submission['status']) => {
+    try {
+      await updateDoc(doc(db, 'submissions', id), { status });
+    } catch (e) {
+      console.error('Status Update Failure:', e);
     }
   };
 
@@ -2093,13 +2355,16 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
             >
               <Download size={14} /> Export PNG
             </button>
-            <button 
-              onClick={() => setIsCreating(!isCreating)}
-              className="geometric-button-primary !py-4 !px-10 text-xs !rounded-full flex items-center gap-3"
-            >
-              {isCreating ? <X size={16} /> : <Plus size={16} />}
-              {isCreating ? 'Abort Operation' : 'Launch New Intel'}
-            </button>
+              <button 
+                onClick={() => {
+                  setIsCreating(!isCreating);
+                  if (isCreating) setEditingPost(null);
+                }}
+                className="geometric-button-primary !py-4 !px-10 text-xs !rounded-full flex items-center gap-3"
+              >
+                {(isCreating || editingPost) ? <X size={16} /> : <Plus size={16} />}
+                {(isCreating || editingPost) ? 'Abort Operation' : 'Launch New Intel'}
+              </button>
             <button 
               onClick={handleLogout}
               className="geometric-nav-link text-slate-400 hover:text-red-600 !p-0"
@@ -2172,7 +2437,7 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
                 </div>
                 <div className="flex justify-end gap-4">
                    <button type="submit" disabled={loading} className="geometric-button-primary !px-16 !py-6 !rounded-full !bg-black !text-white hover:!bg-yellow-400 hover:!text-black transition-all shadow-2xl">
-                      {loading ? 'Encrypting...' : 'Publish Extraction'}
+                      {loading ? 'Encrypting...' : (editingPost ? 'Update Intel' : 'Publish Extraction')}
                    </button>
                 </div>
               </form>
@@ -2180,38 +2445,124 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
           )}
         </AnimatePresence>
 
+        <div className="flex gap-4">
+          <button 
+            onClick={() => setActiveTab('posts')}
+            className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'posts' ? 'bg-black text-white shadow-xl' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}
+          >
+            Intelligence Briefings
+          </button>
+          <button 
+            onClick={() => setActiveTab('submissions')}
+            className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'submissions' ? 'bg-black text-white shadow-xl' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}
+          >
+            Direct Signals {submissions.filter(s => s.status === 'unread').length > 0 && <span className="ml-2 bg-yellow-400 text-black px-1.5 py-0.5 rounded-md text-[8px]">{submissions.filter(s => s.status === 'unread').length}</span>}
+          </button>
+        </div>
+
         <div className="space-y-6">
-          <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-400">Deployed Intelligence Index</h3>
-          <div className="grid gap-4">
-            {posts.map(post => (
-              <div key={post.id} className="geometric-card bg-white border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-black transition-all">
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-14 bg-black/10 rounded-lg overflow-hidden border border-white/10 shrink-0">
-                    <img src={post.featured_image} className="w-full h-full object-cover" />
+          {activeTab === 'posts' ? (
+            <>
+              <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-400">Deployed Intelligence Index</h3>
+              <div className="grid gap-4">
+                {posts.map(post => (
+                  <div key={post.id} className="geometric-card bg-white border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-black transition-all">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-14 bg-black/10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                        <img src={post.featured_image} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <h4 className="font-black italic uppercase text-slate-900 leading-none">{post.title}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 italic">{new Date(post.date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-8 items-center">
+                      <button 
+                        onClick={() => {
+                          setNewPost({
+                            title: post.title,
+                            date: post.date,
+                            featured_image: post.featured_image,
+                            description: post.description,
+                            body: post.body
+                          });
+                          setEditingPost(post);
+                          setIsCreating(true);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-black transition-colors italic"
+                      >
+                        Edit Intel
+                      </button>
+                      <button 
+                        onClick={() => setPage('blog-post', post.slug)}
+                        className="text-[10px] font-black text-yellow-600 uppercase tracking-widest hover:text-black transition-colors italic"
+                      >
+                        View on Site
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(post.id!)}
+                        className="text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors italic"
+                      >
+                        Delete Post
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-black italic uppercase text-slate-900 leading-none">{post.title}</h4>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 italic">{new Date(post.date).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex gap-8 items-center">
-                  <button 
-                    onClick={() => setPage('blog-post', post.slug)}
-                    className="text-[10px] font-black text-yellow-600 uppercase tracking-widest hover:text-black transition-colors italic"
-                  >
-                    View on Site
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(post.id!)}
-                    className="text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors italic"
-                  >
-                    Delete Post
-                  </button>
-                </div>
+                ))}
+                {posts.length === 0 && <div className="p-20 text-center text-slate-300 font-bold italic border-2 border-dashed border-slate-200 rounded-[2rem]">No intelligence deployed in this sector.</div>}
               </div>
-            ))}
-            {posts.length === 0 && <div className="p-20 text-center text-slate-300 font-bold italic border-2 border-dashed border-slate-200 rounded-[2rem]">No intelligence deployed in this sector.</div>}
-          </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-400">Intercepted Communications</h3>
+              <div className="grid gap-6">
+                {submissions.map(sub => (
+                  <div key={sub.id} className={`geometric-card border-slate-200 p-8 space-y-6 transition-all ${sub.status === 'unread' ? 'bg-yellow-50 border-yellow-200' : 'bg-white opacity-80'}`}>
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${sub.status === 'unread' ? 'bg-yellow-500 animate-pulse' : 'bg-slate-300'}`} />
+                          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">Sector: {sub.form_name}</span>
+                        </div>
+                        <h4 className="text-xl font-black italic uppercase text-slate-900 tracking-tighter">
+                          {sub.data.first_name} {sub.data.last_name || sub.data.name}
+                        </h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{sub.data.email}</p>
+                      </div>
+                      <div className="flex gap-4">
+                        {sub.status === 'unread' && (
+                          <button 
+                            onClick={() => handleUpdateSubmissionStatus(sub.id, 'read')}
+                            className="bg-black text-white px-6 py-2 rounded-full text-[8px] font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all"
+                          >
+                            Acknowledge
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => handleDeleteSubmission(sub.id)}
+                          className="text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 bg-black/5 rounded-2xl border border-black/5">
+                      <p className="text-xs font-bold text-slate-600 leading-relaxed italic">"{sub.data.message || 'No written payload detected.'}"</p>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest text-slate-300 italic">
+                      <div>Captured: {sub.createdAt?.toDate ? sub.createdAt.toDate().toLocaleString() : 'System Time Unknown'}</div>
+                      <div className="flex gap-4">
+                         {sub.data.subject && <span>Objective: {sub.data.subject}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {submissions.length === 0 && <div className="p-20 text-center text-slate-300 font-bold italic border-2 border-dashed border-slate-200 rounded-[2rem]">Quiet on all frequencies. No incoming signals.</div>}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -2223,15 +2574,11 @@ const AdminPortal = ({ posts, setPage }: { posts: BlogPost[], setPage: (p: PageI
 const ControlHub = ({ 
   currency, 
   setCurrency, 
-  supportedCurrencies, 
-  theme, 
-  setTheme 
+  supportedCurrencies
 }: { 
   currency: string; 
   setCurrency: (c: string) => void; 
   supportedCurrencies: string[]; 
-  theme: 'light' | 'dark'; 
-  setTheme: (t: 'light' | 'dark') => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -2243,40 +2590,12 @@ const ControlHub = ({
             initial={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.8, y: 20, filter: 'blur(10px)' }}
-            className="mb-6 p-8 bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] min-w-[320px] ring-1 ring-black/5"
+            className="mb-6 p-8 bg-black border border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] min-w-[320px] ring-1 ring-white/5 text-white"
           >
             <div className="space-y-8">
-              {/* Theme Toggle */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                  <p className="text-[10px] font-black italic text-slate-400 dark:text-white/40 uppercase tracking-widest leading-none">Global Atmosphere</p>
-                  <div className={`w-2 h-2 rounded-full ${theme === 'dark' ? 'bg-indigo-500 animate-pulse' : 'bg-orange-400'}`} />
-                </div>
-                <div className="flex gap-2 p-1 bg-black/10 dark:bg-white/5 rounded-2xl">
-                  <button 
-                    onClick={() => setTheme('light')}
-                    className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-xl transition-all duration-500 ${
-                      theme === 'light' ? 'bg-white text-slate-900 shadow-xl' : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    <Sun size={16} className={theme === 'light' ? 'text-orange-500' : ''} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Day Mode</span>
-                  </button>
-                  <button 
-                    onClick={() => setTheme('dark')}
-                    className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-xl transition-all duration-500 ${
-                      theme === 'dark' ? 'bg-slate-800 text-white shadow-xl' : 'text-white/20 hover:text-white/40'
-                    }`}
-                  >
-                    <Moon size={16} className={theme === 'dark' ? 'text-indigo-400' : ''} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Night Ops</span>
-                  </button>
-                </div>
-              </div>
-
               {/* Currency Selection */}
               <div className="space-y-4">
-                <p className="text-[10px] font-black italic text-slate-400 dark:text-white/40 uppercase tracking-widest pl-2">Pricing Protocol ({currency})</p>
+                <p className="text-[10px] font-black italic text-white/40 uppercase tracking-widest pl-2">Pricing Protocol ({currency})</p>
                 <div className="grid grid-cols-3 gap-2">
                   {supportedCurrencies.map(c => (
                     <button 
@@ -2285,7 +2604,7 @@ const ControlHub = ({
                       className={`py-3 rounded-xl text-[10px] font-black italic uppercase transition-all duration-300 ${
                         currency === c 
                           ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20' 
-                          : 'bg-black/5 dark:bg-white/5 text-slate-400 dark:text-white/30 hover:bg-black/10 dark:hover:bg-white/10 hover:text-slate-600 dark:hover:text-white'
+                          : 'bg-white/5 text-white/30 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       {c}
@@ -2327,28 +2646,6 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
   const [activePostSlug, setActivePostSlug] = useState<string | null>(null);
-
-  // Theme Logic
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('dg-theme') as 'light' | 'dark';
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-       // Optional: auto detect browser preference but user wanted manual section
-       // setTheme('dark'); 
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('dg-theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
 
   // Currency Logic
   const [currency, setCurrency] = useState('EUR');
@@ -2461,7 +2758,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <div className="geometric-container">
+      <div className="geometric-container dark bg-black text-white">
       <Navbar 
         activePage={currentPage} 
         setPage={setView} 
@@ -2485,80 +2782,78 @@ export default function App() {
         currency={currency}
         setCurrency={setCurrency}
         supportedCurrencies={supportedCurrencies}
-        theme={theme}
-        setTheme={setTheme}
       />
 
-      <footer className="bg-white text-slate-950 py-24 px-6 md:px-10 mt-32 border-t-[10px] border-black relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/5 rounded-full blur-[120px] -mr-64 -mt-64" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-black/10 rounded-full blur-[100px] -ml-48 -mb-48 opacity-30" />
+    <footer className="bg-[#0a0b1a] text-white py-24 px-6 md:px-10 mt-0 border-t border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/10 rounded-full blur-[120px] -mr-64 -mt-64" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] -ml-48 -mb-48 opacity-30" />
         <div className="max-w-7xl mx-auto space-y-20 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-16 lg:gap-24">
+            <div className="space-y-6 sm:space-y-8 text-center sm:text-left">
               <div 
-                className="flex items-center gap-3 cursor-pointer group"
+                className="flex items-center justify-center sm:justify-start gap-3 cursor-pointer group"
                 onClick={() => setView('home')}
               >
-                <div className="w-12 h-12 bg-yellow-400 rounded-xl rotate-12 flex items-center justify-center group-hover:rotate-0 transition-transform duration-500 shadow-md shadow-yellow-400/20 shrink-0">
+                <div className="w-[47px] h-[44px] bg-yellow-400 rounded-2xl rotate-12 flex items-center justify-center group-hover:rotate-0 transition-transform duration-500 shadow-xl shadow-yellow-400/20 shrink-0">
                   <div className="relative">
                     <GraduationCap size={24} className="text-black" />
-                    <Zap size={12} className="text-black absolute -top-1.5 -right-1.5 fill-black" />
+                    <Zap size={14} className="text-black absolute -top-2 -right-2 fill-black" />
                   </div>
                 </div>
-                <div className="flex flex-col justify-center">
-                  <div className="font-display text-xl lg:text-2xl font-black text-slate-950 tracking-tighter uppercase italic leading-none">
-                    DegreeGate<span className="text-accent font-black">°</span>
+                <div className="flex flex-col text-left">
+                  <div className="font-display text-xl lg:text-2xl font-black text-white tracking-tighter uppercase italic leading-none">
+                    DegreeGate<span className="text-yellow-500">.</span>
                   </div>
-                  <div className="text-[7px] font-black text-slate-950/60 uppercase tracking-[0.2em] mt-0.5">Tactical Strategy Hub</div>
+                  <div className="text-[7px] font-black text-white/40 uppercase tracking-[0.2em] mt-0.5">Operational Phase: Beta</div>
                 </div>
               </div>
-              <p className="text-slate-950/60 text-[11px] font-medium leading-relaxed max-w-xs italic uppercase tracking-tighter">
-                Tactical academic and career protection for high-impact students. We audit the system so you don't have to.
+              <p className="text-white/60 text-xs sm:text-[11px] font-medium leading-relaxed max-w-xs mx-auto sm:mx-0 italic uppercase tracking-tighter">
+                DegreeGate helps international students explore study opportunities and academic pathways in Europe. Navigate the complexity of European academia with tactical precision.
               </p>
             </div>
             
-            <div className="space-y-5">
-              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Operational Sectors</h4>
+            <div className="space-y-5 text-center sm:text-left">
+              <h4 className="text-[9px] font-black uppercase text-white tracking-[0.2em] border-b border-white/10 pb-2">Academic Intel & Shields</h4>
               <ul className="space-y-3">
-                <li><button onClick={() => setView('thesis-shield')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Thesis Shield</button></li>
-                <li><button onClick={() => setView('internship-shield')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Internship Pipeline</button></li>
-                <li><button onClick={() => setView('subject-catalog')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Subject Catalog</button></li>
-                <li><button onClick={() => setView('degree-gateway')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Gateway Hub</button></li>
+                <li><button onClick={() => setView('thesis-shield')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Thesis Shield & Protection</button></li>
+                <li><button onClick={() => setView('internship-shield')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Internship Shields Hub</button></li>
+                <li><button onClick={() => setView('subject-catalog')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Subject Expert (Tech & Biz)</button></li>
+                <li><button onClick={() => setView('degree-gateway')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Intelligence Gateway</button></li>
               </ul>
             </div>
             
-            <div className="space-y-5">
-              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Direct Channels</h4>
+            <div className="space-y-5 text-center sm:text-left">
+              <h4 className="text-[9px] font-black uppercase text-white tracking-[0.2em] border-b border-white/10 pb-2">Expert Channels</h4>
               <ul className="space-y-3">
-                <li><a href="mailto:help@degreegate.com" className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">help@degreegate.com</a></li>
-                <li><button onClick={() => setView('blog')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Intelligence Blog</button></li>
-                <li><button onClick={() => setView('about')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Operational History</button></li>
-                <li><button onClick={() => setView('contact')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Contact Intel</button></li>
+                <li><a href="mailto:help@degreegate.com" className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Expert Support Intel</a></li>
+                <li><button onClick={() => setView('blog')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Intelligence Blogs</button></li>
+                <li><button onClick={() => setView('expert-advice')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Expert In Tech Advice</button></li>
+                <li><button onClick={() => setView('contact')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Contact Hub Intel</button></li>
               </ul>
             </div>
 
-            <div className="space-y-6">
-              <h4 className="text-[9px] font-black uppercase text-slate-900 tracking-[0.2em] border-b border-slate-200 pb-2">Legal Access</h4>
+            <div className="space-y-6 text-center sm:text-left">
+              <h4 className="text-[9px] font-black uppercase text-white tracking-[0.2em] border-b border-white/10 pb-2">Legal Access</h4>
               <ul className="space-y-3">
-                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
-                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-slate-950 hover:text-accent transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
-                <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-slate-950/30 hover:text-accent transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
+                <li><button onClick={() => setView('privacy')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Privacy Policy</button></li>
+                <li><button onClick={() => setView('terms')} className="text-[11px] font-bold text-white/70 hover:text-white transition-colors uppercase italic tracking-tighter">Terms of Service</button></li>
+                <li><button onClick={() => setView('admin')} className="text-[11px] font-bold text-white/30 hover:text-white transition-colors uppercase italic tracking-tighter">Admin Portal</button></li>
               </ul>
             </div>
           </div>
           
-          <div className="pt-10 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-[10px] font-black text-black uppercase tracking-widest italic">
-              © 2026 DegreeGate Intelligence Network. All Rights Reserved.
+          <div className="pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest italic text-center sm:text-left">
+              © {new Date().getFullYear()} DegreeGate Intelligence Network. All Rights Reserved.
             </div>
             <div className="flex gap-8">
               {[
-                { icon: <Facebook size={22} />, title: "Facebook", href:socials[0].href },
-                { icon: <X size={22} />, title: "X", href: socials[1].href },
-                { icon: <Instagram size={22} />, title: "Instagram", href: socials[2].href },
-                { icon: <Linkedin size={22} />, title: "LinkedIn", href: socials[3].href }
+                { icon: <Facebook size={18} />, title: "Facebook", href:socials[0].href },
+                { icon: <X size={18} />, title: "X", href: socials[1].href },
+                { icon: <Instagram size={18} />, title: "Instagram", href: socials[2].href },
+                { icon: <Linkedin size={18} />, title: "LinkedIn", href: socials[3].href }
               ].map((social, i) => (
-                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-slate-950/40 hover:text-black transition-all hover:scale-110" title={social.title}>{social.icon}</a>
+                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-all hover:scale-110" title={social.title}>{social.icon}</a>
               ))}
             </div>
           </div>
